@@ -250,13 +250,12 @@
                 {{ $field('footer_address', $d['footer_address']) }}
 
                 @if($settings->footer_email)
-                    <br>
-                    <span class="hide-sm show-md">
+                    <div style="margin-top: 12px;">
                         Email address
                         <a href="mailto:{{ $settings->footer_email }}" class="color-inherit">
                             {{ $settings->footer_email }}
                         </a>
-                    </span>
+                    </div>
                 @endif
             </div>
         </div>
