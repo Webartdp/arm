@@ -51,19 +51,25 @@
             'visits' => 'Количество посещений сайта по месяцам',
             'documents' => 'Количество документов, проверенных на сайте за 12 месяцев по типам',
             'months' => ['Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль'],
+            'health' => 'EH',
+            'apostile' => 'AP',
             'diplomas' => 'Дипломы и аттестаты',
         ],
         'en' => [
             'visits' => 'Number of website visits by month',
             'documents' => 'Number of documents verified on the website over 12 months by type',
             'months' => ['February', 'March', 'April', 'May', 'June', 'July'],
+            'health' => 'Health certificates',
+            'apostile' => 'Apostile',
             'diplomas' => 'Diplomas and certificates',
         ],
         'am' => [
             'visits' => 'Կայքի այցելությունների քանակն ըստ ամիսների',
             'documents' => 'Կայքում 12 ամսվա ընթացքում ստուգված փաստաթղթերի քանակն ըստ տեսակների',
             'months' => ['Փետրվար', 'Մարտ', 'Ապրիլ', 'Մայիս', 'Հունիս', 'Հուլիս'],
-            'diplomas' => 'Դիպլոմներ և վկայականներ',
+            'health' => 'Բժշկական վկայականներ',
+            'apostile' => 'Ապոստիլներ',
+            'diplomas' => 'Դիպլոմներ և ատեստատներ',
         ],
     ][$locale] ?? null;
 @endphp
@@ -308,7 +314,7 @@
         ctx.restore();
     }
 
-    var labels2 = ['BY', 'MD', 'FA', 'UG', 'NT', 'EJ', 'Health certificates', 'Apostile', 'Diplomas and certificates'];
+    var labels2 = ['BY', 'MD', 'FA', 'UG', 'NT', 'EJ', copy.health, copy.apostile, copy.diplomas];
     var labelY = [489, 523, 558, 593, 628, 663, 697, 732, 766];
 
     for (var l = 0; l < labels2.length; l++) {
