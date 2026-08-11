@@ -12,7 +12,7 @@
             'birth_place' => 'place of birth (country, region, residence)',
             'father' => 'father',
             'mother' => 'mother',
-            'registration_note' => 'Registration details recorded for this document',
+            'registration_note' => 'about which a record has been registered in the unified electronic registry of the civil status acts of the Republic of Armenia',
             'registration_date' => 'registration date (year-month-day)',
             'registration_number' => 'registration number',
             'registration_authority' => 'registration authority',
@@ -35,7 +35,7 @@
             'birth_place' => 'место рождения (страна, регион, населённый пункт)',
             'father' => 'отец',
             'mother' => 'мать',
-            'registration_note' => 'Регистрационные данные, указанные для этого документа',
+            'registration_note' => 'о чем произведена запись в едином электронном реестре актов гражданского состояния Республики Армения',
             'registration_date' => 'дата регистрации (год-месяц-день)',
             'registration_number' => 'номер регистрации',
             'registration_authority' => 'орган регистрации',
@@ -58,7 +58,7 @@
             'birth_place' => 'ծննդյան վայրը (երկիր, մարզ, բնակավայր)',
             'father' => 'Հայրը',
             'mother' => 'Մայրը',
-            'registration_note' => 'Այս փաստաթղթի համար նշված գրանցման տվյալները',
+            'registration_note' => 'որի մասին ՀՀ քաղաքացիական կացության ակտերի գրանցման միասնական էլեկտրոնային գրանցամատյանում կատարվել է գրանցում',
             'registration_date' => 'գրանցման ամսաթիվը (տարի-ամիս-օր)',
             'registration_number' => 'գրանցման համարը',
             'registration_authority' => 'գրանցման մարմինը',
@@ -76,29 +76,23 @@
 @endphp
 
 <style>
+    /* The successful birth-certificate screen replaces the search form. */
     body:has(.birth-result-marker) .loading-target > .verify-card,
     body:has(.birth-result-marker) .loading-target > .verify-card + .verify-card-desc {
         display: none !important;
     }
 
-    body:has(.birth-result-marker) #main_cont {
-        width: 100% !important;
-        max-width: none !important;
-        flex: 0 0 100% !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
-    }
-
+    /* Source screenshot: 1128px white card, 72px below the page heading. */
     body:has(.birth-result-marker) .verification-success {
         position: relative;
         width: min(1128px, calc(100vw - 44px));
         max-width: none;
-        margin: 72px auto 42px;
+        margin: 72px auto 0 !important;
         padding: 151px 0 0 !important;
         overflow: visible !important;
         border-radius: 12px !important;
         background: #fff !important;
-        box-shadow: 0 3px 21px rgba(31, 42, 51, .10) !important;
+        box-shadow: 0 0 15px rgba(0, 0, 0, .10) !important;
     }
 
     body:has(.birth-result-marker) .verification-success > .row {
@@ -111,14 +105,15 @@
         width: 100% !important;
         max-width: none !important;
         flex: 0 0 100% !important;
-        padding-left: 0 !important;
-        padding-right: 0 !important;
+        padding: 0 !important;
     }
 
+    /* The native result pin is replaced by the source-style code/search bar. */
     body:has(.birth-result-marker) .verification-success .result-pin {
         display: none !important;
     }
 
+    /* Exact source teal block: 912 × 198. */
     body:has(.birth-result-marker) .verification-success .result-card {
         position: relative !important;
         width: min(912px, calc(100% - 64px));
@@ -128,36 +123,58 @@
         margin: 0 auto !important;
         padding: 0 !important;
         border: 0 !important;
-        border-radius: 14px !important;
-        background: #20bdbb !important;
+        border-radius: 12px !important;
+        background: #18BBB4 !important;
         box-shadow: none !important;
         color: #fff !important;
         overflow: visible !important;
     }
 
+    /* Keep the original 80px protruding circle from app.min.css. */
+    body:has(.birth-result-marker) .verification-success .result-card:before {
+        background: #18BBB4 !important;
+    }
+
+    /* In the reference this icon sits inside the protruding circle, not above it. */
     body:has(.birth-result-marker) .verification-success .result-card--img {
         position: absolute !important;
-        top: -19px !important;
+        top: 3px !important;
         left: 50% !important;
-        width: 58px !important;
-        height: 58px !important;
-        margin: 0 0 0 -29px !important;
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
+        z-index: 3;
+        transform: translateX(-50%) !important;
+        margin: 0 !important;
+        color: #fff !important;
+    }
+
+    /* Replace the square check-filled glyph with the reference circled check. */
+    body:has(.birth-result-marker) .verification-success .result-card--img i {
+        position: relative;
+        display: block;
+        width: 30px;
+        height: 30px;
+        border: 3px solid #fff;
         border-radius: 50%;
-        background: #20bdbb;
-        color: #fff;
-        font-size: 30px !important;
-        line-height: 1 !important;
-        z-index: 2;
+        font-size: 0 !important;
+    }
+
+    body:has(.birth-result-marker) .verification-success .result-card--img i:before {
+        content: '' !important;
+        position: absolute;
+        left: 6px;
+        top: 6px;
+        width: 11px;
+        height: 7px;
+        border-left: 3px solid #fff;
+        border-bottom: 3px solid #fff;
+        transform: rotate(-45deg);
     }
 
     body:has(.birth-result-marker) .verification-success .result-card--title,
     body:has(.birth-result-marker) .verification-success .result-card--text {
-        visibility: hidden !important;
+        display: none !important;
     }
 
+    /* Data block aligns exactly with the 912px teal block. */
     body:has(.birth-result-marker) .verification-document-body {
         width: min(912px, calc(100% - 64px));
         margin: 0 auto;
@@ -171,7 +188,7 @@
     .birth-result-marker {
         display: block;
         height: 0;
-        overflow: visible;
+        overflow: hidden;
     }
 
     .birth-result-topbar {
@@ -188,16 +205,16 @@
         justify-content: space-between;
         gap: 22px;
         border-radius: 8px;
-        background: #f2f2f2;
+        background: #F5F5F5;
         box-sizing: border-box;
     }
 
     .birth-result-code {
-        color: #16191d;
-        font-family: Arial, Helvetica, sans-serif;
-        font-size: 23px;
+        color: #333;
+        font-family: HelveticaNeueLTARMW05-75Bd, Arial, sans-serif;
+        font-size: 22px;
         line-height: 1;
-        font-weight: 800;
+        font-weight: 700;
         letter-spacing: 3.7px;
         white-space: nowrap;
     }
@@ -206,8 +223,8 @@
         display: inline-flex;
         align-items: center;
         gap: 12px;
-        color: #aaaeb3 !important;
-        font-family: Arial, Helvetica, sans-serif;
+        color: #ADADAD !important;
+        font-family: HelveticaNeueLTARMW05-55Rm, Arial, sans-serif;
         font-size: 13px;
         line-height: 1;
         font-weight: 400;
@@ -231,7 +248,7 @@
         left: 1px;
         width: 20px;
         height: 2px;
-        background: #9da2a7;
+        background: #ADADAD;
         border-radius: 2px;
     }
 
@@ -244,9 +261,9 @@
         left: 32px;
         right: 32px;
         margin: 0;
-        color: #17191c;
-        font-family: Georgia, 'Times New Roman', serif;
-        font-size: 34px;
+        color: #333;
+        font-family: 'GHEA Narek', Georgia, 'Times New Roman', serif;
+        font-size: 35px;
         line-height: 1.18;
         font-weight: 400;
         text-align: center;
@@ -261,7 +278,7 @@
         transform: translateX(-50%);
         width: min(760px, calc(100% - 96px));
         color: #fff;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: HelveticaNeueLTARMW05-55Rm, Arial, sans-serif;
         font-size: 24px;
         line-height: 1.2;
         font-weight: 400;
@@ -284,13 +301,12 @@
         gap: 10px;
         border: 0;
         border-radius: 22px;
-        background: #5c5f61;
-        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, .18);
+        background: #5C5C5C;
         color: #fff !important;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: HelveticaNeueLTARMW05-75Bd, Arial, sans-serif;
         font-size: 11px;
         line-height: 1;
-        font-weight: 800;
+        font-weight: 700;
         text-decoration: none !important;
         text-transform: uppercase;
         white-space: nowrap;
@@ -327,18 +343,22 @@
 
     .verification-source-details {
         padding: 0;
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: HelveticaNeueLTARMW05-55Rm, Arial, sans-serif;
     }
 
     .verification-source-section {
         margin: 0;
-        padding: 0 0 18px;
+        padding: 0 0 17px;
         border: 0;
-        border-bottom: 1px dashed #bfc4c7;
+        border-bottom: 1px dashed #BFC4C7;
+    }
+
+    .verification-source-section:first-child {
+        padding-bottom: 13px;
     }
 
     .verification-source-section + .verification-source-section {
-        padding-top: 25px;
+        padding-top: 22px;
     }
 
     .verification-source-section:last-child {
@@ -348,8 +368,8 @@
 
     .verification-source-section__title {
         margin: 0 0 12px;
-        color: #1e2022;
-        font-family: Arial, Helvetica, sans-serif;
+        color: #333;
+        font-family: HelveticaNeueLTARMW05-55Rm, Arial, sans-serif;
         font-size: 15px;
         line-height: 1.35;
         font-weight: 400;
@@ -359,7 +379,7 @@
     .verification-source-section__title--note {
         max-width: 850px;
         margin-bottom: 12px;
-        color: #1e2022;
+        color: #333;
         font-size: 15px;
         line-height: 1.35;
         font-weight: 400;
@@ -369,40 +389,34 @@
         display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 0;
-        padding: 7px 0;
-        font-family: Arial, Helvetica, sans-serif;
+        padding: 9px 0;
+        font-family: HelveticaNeueLTARMW05-55Rm, Arial, sans-serif;
         font-size: 13px;
         line-height: 1.45;
     }
 
     .verification-source-row > div {
         padding-right: 25px;
-        color: #a8adb1;
+        color: #ADADAD;
         font-weight: 400;
     }
 
     .verification-source-row > strong {
-        color: #17191b;
+        color: #333;
+        font-family: HelveticaNeueLTARMW05-55Rm, Arial, sans-serif;
         font-weight: 400;
         overflow-wrap: anywhere;
     }
 
+    /* Source result page has no extra 70px response-card gap before the footer. */
     body:has(.birth-result-marker) footer {
         margin-top: 0 !important;
-        padding-top: 44px !important;
-        padding-bottom: 42px !important;
-    }
-
-    body:has(.birth-result-marker) footer .footer-copyright {
-        color: #aeb2b6 !important;
-        font-family: Arial, Helvetica, sans-serif !important;
-        font-weight: 400 !important;
     }
 
     @media (max-width: 760px) {
         body:has(.birth-result-marker) .verification-success {
             width: calc(100vw - 24px);
-            margin-top: 58px;
+            margin-top: 58px !important;
             padding-top: 136px !important;
         }
 
@@ -454,6 +468,7 @@
 
         .verification-source-row {
             grid-template-columns: 45% 55%;
+            padding: 7px 0;
             font-size: 12px;
         }
 
