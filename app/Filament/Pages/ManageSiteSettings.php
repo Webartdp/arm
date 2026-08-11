@@ -11,6 +11,7 @@ use Filament\Notifications\Notification;
 use Filament\Pages\Page;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Form;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
@@ -55,31 +56,54 @@ class ManageSiteSettings extends Page
         return $schema
             ->components([
                 Form::make([
-                    FileUpload::make('logo')
-                        ->label('Логотип')
-                        ->image()
-                        ->disk('public')
-                        ->directory('site')
-                        ->visibility('public'),
+                    Section::make('Брендинг и изображения')
+                        ->columns(2)
+                        ->schema([
+                            FileUpload::make('logo')
+                                ->label('Логотип')
+                                ->image()
+                                ->disk('public')
+                                ->directory('site')
+                                ->visibility('public')
+                                ->preventFilePathTampering(),
 
-                    FileUpload::make('favicon')
-                        ->label('Favicon')
-                        ->image()
-                        ->disk('public')
-                        ->directory('site')
-                        ->visibility('public'),
+                            FileUpload::make('favicon')
+                                ->label('Favicon')
+                                ->image()
+                                ->disk('public')
+                                ->directory('site')
+                                ->visibility('public')
+                                ->preventFilePathTampering(),
 
-                    FileUpload::make('hero_image')
-                        ->label('Изображение в центральном блоке')
-                        ->image()
-                        ->disk('public')
-                        ->directory('site')
-                        ->visibility('public'),
+                            FileUpload::make('hero_image')
+                                ->label('Изображение в блоке проверки')
+                                ->image()
+                                ->disk('public')
+                                ->directory('site')
+                                ->visibility('public')
+                                ->preventFilePathTampering(),
 
-                    TextInput::make('footer_email')
-                        ->label('Email')
-                        ->email()
-                        ->maxLength(255),
+                            FileUpload::make('footer_left_image')
+                                ->label('Изображение футера слева')
+                                ->image()
+                                ->disk('public')
+                                ->directory('site')
+                                ->visibility('public')
+                                ->preventFilePathTampering(),
+
+                            FileUpload::make('footer_right_image')
+                                ->label('Изображение футера справа')
+                                ->image()
+                                ->disk('public')
+                                ->directory('site')
+                                ->visibility('public')
+                                ->preventFilePathTampering(),
+
+                            TextInput::make('footer_email')
+                                ->label('Email в футере')
+                                ->email()
+                                ->maxLength(255),
+                        ]),
 
                     Tabs::make('Языки')
                         ->tabs([
@@ -108,53 +132,87 @@ class ManageSiteSettings extends Page
     {
         return Tab::make($label)
             ->schema([
-                TextInput::make("site_name_{$locale}")
-                    ->label('Название сайта')
-                    ->required()
-                    ->maxLength(255),
+                Section::make('Шапка и главный экран')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make("site_name_{$locale}")
+                            ->label('Название сайта')
+                            ->required()
+                            ->maxLength(255),
 
-                TextInput::make("hero_title_{$locale}")
-                    ->label('Главный заголовок')
-                    ->required()
-                    ->maxLength(255),
+                        TextInput::make("nav_about_{$locale}")
+                            ->label('Пункт меню: О системе')
+                            ->maxLength(255),
 
-                TextInput::make("form_title_{$locale}")
-                    ->label('Заголовок над номером')
-                    ->required()
-                    ->maxLength(255),
+                        TextInput::make("nav_statistics_{$locale}")
+                            ->label('Пункт меню: Статистика')
+                            ->maxLength(255),
 
-                TextInput::make("input_placeholder_{$locale}")
-                    ->label('Placeholder поля')
-                    ->maxLength(255),
+                        TextInput::make("hero_title_{$locale}")
+                            ->label('Главный заголовок')
+                            ->required()
+                            ->maxLength(255),
 
-                TextInput::make("button_text_{$locale}")
-                    ->label('Текст кнопки')
-                    ->required()
-                    ->maxLength(100),
+                        TextInput::make("hero_subtitle_{$locale}")
+                            ->label('Подзаголовок')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                    ]),
 
-                Textarea::make("helper_text_{$locale}")
-                    ->label('Поясняющий текст')
-                    ->rows(4),
+                Section::make('Форма проверки')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make("form_title_{$locale}")
+                            ->label('Заголовок над кодом')
+                            ->required()
+                            ->maxLength(255),
 
-                TextInput::make("footer_title_{$locale}")
-                    ->label('Заголовок футера')
-                    ->maxLength(255),
+                        TextInput::make("input_placeholder_{$locale}")
+                            ->label('Placeholder кода')
+                            ->maxLength(255),
 
-                Textarea::make("footer_address_{$locale}")
-                    ->label('Адрес / контакты')
-                    ->rows(3),
+                        TextInput::make("date_placeholder_{$locale}")
+                            ->label('Placeholder даты')
+                            ->maxLength(255),
 
-                TextInput::make("copyright_{$locale}")
-                    ->label('Copyright')
-                    ->maxLength(255),
+                        TextInput::make("button_text_{$locale}")
+                            ->label('Текст кнопки')
+                            ->required()
+                            ->maxLength(100),
 
-                TextInput::make("seo_title_{$locale}")
-                    ->label('SEO Title')
-                    ->maxLength(255),
+                        Textarea::make("helper_text_{$locale}")
+                            ->label('Поясняющий текст')
+                            ->rows(4)
+                            ->columnSpanFull(),
+                    ]),
 
-                Textarea::make("seo_description_{$locale}")
-                    ->label('SEO Description')
-                    ->rows(3),
+                Section::make('Футер')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make("footer_title_{$locale}")
+                            ->label('Заголовок футера')
+                            ->maxLength(255),
+
+                        TextInput::make("copyright_{$locale}")
+                            ->label('Copyright')
+                            ->maxLength(255),
+
+                        Textarea::make("footer_address_{$locale}")
+                            ->label('Адрес / контакты')
+                            ->rows(3)
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('SEO')
+                    ->schema([
+                        TextInput::make("seo_title_{$locale}")
+                            ->label('SEO Title')
+                            ->maxLength(255),
+
+                        Textarea::make("seo_description_{$locale}")
+                            ->label('SEO Description')
+                            ->rows(3),
+                    ]),
             ]);
     }
 
