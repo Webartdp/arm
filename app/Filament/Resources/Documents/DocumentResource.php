@@ -128,6 +128,21 @@ class DocumentResource extends Resource
                             ->preventFilePathTampering()
                             ->helperText('PDF/JPG/PNG/WEBP, до 20 МБ. Файл хранится в приватном storage.'),
 
+                        FileUpload::make('download_archive_path')
+                            ->label('ZIP-архив для публичного скачивания')
+                            ->disk('local')
+                            ->directory('document-archives')
+                            ->visibility('private')
+                            ->acceptedFileTypes([
+                                'application/zip',
+                                'application/x-zip-compressed',
+                            ])
+                            ->maxSize(51200)
+                            ->previewable(false)
+                            ->downloadable()
+                            ->preventFilePathTampering()
+                            ->helperText('Этот ZIP появится кнопкой скачивания только после успешной проверки активного документа. До 50 МБ.'),
+
                         Textarea::make('notes')
                             ->label('Внутренняя заметка')
                             ->rows(5)
