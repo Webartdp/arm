@@ -75,11 +75,12 @@ class VerificationLogResource extends Resource
                         'draft' => 'Не опубликован',
                         'not_found' => 'Не найден',
                         'invalid' => 'Некорректный код',
+                        'date_mismatch' => 'Дата не совпадает',
                         default => $state,
                     })
                     ->color(fn (string $state): string => match ($state) {
                         'valid' => 'success',
-                        'revoked', 'not_found', 'invalid' => 'danger',
+                        'revoked', 'not_found', 'invalid', 'date_mismatch' => 'danger',
                         'expired', 'draft' => 'warning',
                         default => 'gray',
                     }),
@@ -107,6 +108,7 @@ class VerificationLogResource extends Resource
                         'draft' => 'Не опубликован',
                         'not_found' => 'Не найден',
                         'invalid' => 'Некорректный код',
+                        'date_mismatch' => 'Дата не совпадает',
                     ]),
 
                 SelectFilter::make('locale')
