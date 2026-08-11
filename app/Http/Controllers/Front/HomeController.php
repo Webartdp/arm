@@ -19,6 +19,21 @@ class HomeController extends Controller
             404
         );
 
+        $requestPath = parse_url(
+            (string) $request->server('REQUEST_URI', ''),
+            PHP_URL_PATH
+        );
+
+        if ($requestPath === '/' . $locale) {
+            $target = 'https://' . $request->getHost() . '/' . $locale . '/';
+
+            if ($request->getQueryString()) {
+                $target .= '?' . $request->getQueryString();
+            }
+
+            return redirect()->away($target, 301);
+        }
+
         $settings = SiteSetting::query()->firstOrCreate([
             'id' => 1,
         ]);
