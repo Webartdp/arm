@@ -55,31 +55,52 @@
 
     $verificationCopy = [
         'en' => [
-            'valid' => ['Document found', 'The document record is active in this verification service.'],
+            'valid' => ['The document is valid', 'The document passed verification successfully.'],
             'revoked' => ['Document revoked', 'This document record has been revoked.'],
             'expired' => ['Document expired', 'The validity period of this document record has expired.'],
             'draft' => ['Document unavailable', 'This document record is not published for verification.'],
             'invalid' => ['Invalid code', 'Enter a complete 16-character verification code.'],
             'date_mismatch' => ['Issue date does not match', 'The entered issue date does not match the document record.'],
-            'code' => 'Verification code', 'type' => 'Document type', 'title' => 'Document', 'issued' => 'Issue date', 'valid_until' => 'Valid until',
+            'code' => 'Verification code',
+            'type' => 'Document type',
+            'title' => 'Document',
+            'subject' => 'Holder / recipient',
+            'issued' => 'Issue date',
+            'valid_until' => 'Valid until',
+            'download' => 'Download document archive',
+            'download_hint' => 'The archive contains the file attached to this verified record.',
         ],
         'ru' => [
-            'valid' => ['Документ найден', 'Запись документа активна в этой системе проверки.'],
+            'valid' => ['Документ действителен', 'Документ успешно прошёл проверку.'],
             'revoked' => ['Документ аннулирован', 'Запись этого документа была аннулирована.'],
             'expired' => ['Срок действия истёк', 'Срок действия записи этого документа истёк.'],
             'draft' => ['Документ недоступен', 'Запись документа пока не опубликована для проверки.'],
             'invalid' => ['Некорректный код', 'Введите полный 16-значный код проверки.'],
             'date_mismatch' => ['Дата выдачи не совпадает', 'Введённая дата выдачи не совпадает с записью документа.'],
-            'code' => 'Код проверки', 'type' => 'Тип документа', 'title' => 'Документ', 'issued' => 'Дата выдачи', 'valid_until' => 'Действителен до',
+            'code' => 'Код проверки',
+            'type' => 'Тип документа',
+            'title' => 'Документ',
+            'subject' => 'Владелец / получатель',
+            'issued' => 'Дата выдачи',
+            'valid_until' => 'Действителен до',
+            'download' => 'Скачать архив с документом',
+            'download_hint' => 'Архив содержит файл, прикреплённый к этой проверенной записи.',
         ],
         'am' => [
-            'valid' => ['Փաստաթուղթը գտնվել է', 'Փաստաթղթի գրառումը ակտիվ է այս ստուգման համակարգում։'],
+            'valid' => ['Փաստաթուղթը վավեր է', 'Փաստաթուղթը հաջողությամբ անցել է ստուգումը։'],
             'revoked' => ['Փաստաթուղթը չեղարկված է', 'Այս փաստաթղթի գրառումը չեղարկված է։'],
             'expired' => ['Վավերականության ժամկետը լրացել է', 'Այս փաստաթղթի գրառման վավերականության ժամկետը լրացել է։'],
             'draft' => ['Փաստաթուղթը հասանելի չէ', 'Փաստաթղթի գրառումը դեռ հրապարակված չէ ստուգման համար։'],
             'invalid' => ['Սխալ կոդ', 'Մուտքագրեք ամբողջական 16 նիշանոց ստուգման կոդը։'],
             'date_mismatch' => ['Տրման ամսաթիվը չի համընկնում', 'Մուտքագրված տրման ամսաթիվը չի համընկնում փաստաթղթի գրառման հետ։'],
-            'code' => 'Ստուգման կոդ', 'type' => 'Փաստաթղթի տեսակ', 'title' => 'Փաստաթուղթ', 'issued' => 'Տրման ամսաթիվ', 'valid_until' => 'Վավեր է մինչև',
+            'code' => 'Ստուգման կոդ',
+            'type' => 'Փաստաթղթի տեսակ',
+            'title' => 'Փաստաթուղթ',
+            'subject' => 'Սեփականատեր / ստացող',
+            'issued' => 'Տրման ամսաթիվ',
+            'valid_until' => 'Վավեր է մինչև',
+            'download' => 'Ներբեռնել փաստաթղթի արխիվը',
+            'download_hint' => 'Արխիվը պարունակում է այս ստուգված գրառմանը կցված ֆայլը։',
         ],
     ];
 
@@ -102,6 +123,27 @@
     <meta name="description" content="{{ $field('seo_description', $d['hero_subtitle']) }}">
     @if($settings->favicon)<link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">@endif
     <link rel="stylesheet" href="/static/css/app.min.css?v=2">
+    <style>
+        .verification-success{padding-top:0;overflow:visible}
+        .verification-success .result-pin{position:relative;z-index:2;max-width:620px;margin-left:auto;margin-right:auto}
+        .verification-success .result-pin__code{font-size:16px;letter-spacing:.08em;color:#333}
+        .verification-success .result-card{position:relative;background:#18BBB4;color:#fff;border:0;box-shadow:none}
+        .verification-success .result-card:before{left:50%}
+        .verification-success .result-card--img{font-size:28px;top:4px}
+        .verification-success .result-card--title{color:#fff;margin-top:5px}
+        .verification-success .result-card--text{color:rgba(255,255,255,.92)}
+        .verification-document-body{padding:8px 72px 38px}
+        .verification-document-body .info-item:first-child{padding-top:12px}
+        .verification-download-wrap{text-align:center;margin-top:30px}
+        .verification-download-link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 28px;border-radius:28px;background:linear-gradient(90deg,#125C94 0%,#18BBB4 100%);box-shadow:0 8px 20px rgba(18,92,148,.2);color:#fff!important;font-family:Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
+        .verification-download-link:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(18,92,148,.26);color:#fff}
+        .verification-download-hint{max-width:520px;margin:12px auto 0;text-align:center}
+        @media(max-width:600px){
+            .verification-document-body{padding:8px 22px 28px}
+            .verification-success .result-pin{margin-left:8px;margin-right:8px}
+            .verification-download-link{width:100%;padding:0 18px}
+        }
+    </style>
 </head>
 <body>
 <header>
@@ -169,19 +211,65 @@
                         [$resultTitle, $resultText] = $v[$verificationResult] ?? $v['invalid'];
                         $resultBorder = $verificationResult === 'valid' ? '#18BBB4' : ($verificationResult === 'expired' || $verificationResult === 'draft' ? '#d69e2e' : '#E43F5A');
                     @endphp
-                    <div class="response-card dynamic-view"><div class="row align-center"><div class="column small-14 large-10 x-large-8">
-                        <div class="result-card radius-12 bg-white" style="border-top:4px solid {{ $resultBorder }};">
-                            <div class="result-card--title text-large helvetica-75 font-bold color-grey text-center">{{ $resultTitle }}</div>
-                            <div class="text-small helvetica-55 color-grey-60 text-center">{{ $resultText }}</div>
-                            @if($document && in_array($verificationResult, ['valid', 'expired', 'revoked'], true))
-                                <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['code'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->tracking_number }}</div></div>
-                                @if($document->document_type)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['type'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->document_type }}</div></div>@endif
-                                @if($document->title)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['title'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->title }}</div></div>@endif
-                                @if($document->issue_date)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['issued'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->issue_date->format('d/m/Y') }}</div></div>@endif
-                                @if($document->valid_until)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['valid_until'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->valid_until->format('d/m/Y') }}</div></div>@endif
-                            @endif
+
+                    @if($verificationResult === 'valid' && $document)
+                        <div class="response-card dynamic-view bg-white radius-12 shadow-primary verification-success">
+                            <div class="row align-center"><div class="column small-14 large-10 x-large-8">
+                                <div class="info-bar result-pin bg-grey-5 radius-8 text-center">
+                                    <div class="text-xsmall helvetica-65 color-grey-60">{{ $v['code'] }}</div>
+                                    <div class="helvetica-75 font-bold verification-success result-pin__code">{{ $document->tracking_number }}</div>
+                                </div>
+
+                                <div class="result-card relative radius-12 bg-success color-white text-center">
+                                    <div class="result-card--img"><i class="icon icon-check-filled large"></i></div>
+                                    <div class="result-card--title text-large helvetica-75 font-bold color-white">{{ $resultTitle }}</div>
+                                    <div class="text-small helvetica-55 result-card--text">{{ $resultText }}</div>
+                                </div>
+
+                                <div class="verification-document-body">
+                                    @if($document->document_type)
+                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['type'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->document_type }}</div></div>
+                                    @endif
+                                    @if($document->title)
+                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['title'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->title }}</div></div>
+                                    @endif
+                                    @if($document->subject_name)
+                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['subject'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->subject_name }}</div></div>
+                                    @endif
+                                    @if($document->issue_date)
+                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['issued'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->issue_date->format('d/m/Y') }}</div></div>
+                                    @endif
+                                    @if($document->valid_until)
+                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['valid_until'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->valid_until->format('d/m/Y') }}</div></div>
+                                    @endif
+
+                                    @if($document->download_archive_path)
+                                        <div class="verification-download-wrap">
+                                            <a class="verification-download-link" href="{{ route('front.document.download', ['locale' => $locale, 'trackingNumber' => $document->tracking_number]) }}">
+                                                <i class="icon icon-download medium"></i>
+                                                <span>{{ $v['download'] }}</span>
+                                            </a>
+                                            <div class="verification-download-hint text-xsmall helvetica-55 color-grey-60">{{ $v['download_hint'] }}</div>
+                                        </div>
+                                    @endif
+                                </div>
+                            </div></div>
                         </div>
-                    </div></div></div>
+                    @else
+                        <div class="response-card dynamic-view"><div class="row align-center"><div class="column small-14 large-10 x-large-8">
+                            <div class="result-card radius-12 bg-white" style="border-top:4px solid {{ $resultBorder }};">
+                                <div class="result-card--title text-large helvetica-75 font-bold color-grey text-center">{{ $resultTitle }}</div>
+                                <div class="text-small helvetica-55 color-grey-60 text-center">{{ $resultText }}</div>
+                                @if($document && in_array($verificationResult, ['expired', 'revoked'], true))
+                                    <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['code'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->tracking_number }}</div></div>
+                                    @if($document->document_type)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['type'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->document_type }}</div></div>@endif
+                                    @if($document->title)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['title'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->title }}</div></div>@endif
+                                    @if($document->issue_date)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['issued'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->issue_date->format('d/m/Y') }}</div></div>@endif
+                                    @if($document->valid_until)<div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['valid_until'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->valid_until->format('d/m/Y') }}</div></div>@endif
+                                @endif
+                            </div>
+                        </div></div></div>
+                    @endif
                 @endif
             </div>
             <div class="dynamic-view loading-card relative text-center"><div class="loading-image"><img src="/static/img/loading.svg" alt=""></div><div class="helvetica-55 font-spacing-01 color-grey-80">{{ $locale === 'ru' ? 'Поиск...' : ($locale === 'am' ? 'Որոնում...' : 'Looking for...') }}</div></div>
