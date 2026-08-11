@@ -167,14 +167,18 @@
                                 <a href="{{ route('front.home', ['locale' => $locale]) }}"
                                    class="flex-container align-middle text-xsmall helvetica-55 color-grey-40">
                                     <span>{{ $d['search_another'] }}</span>
-                                    <i class="icon icon-close medium suffix"></i>
+                                    <svg class="suffix" width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" style="display:block; flex:0 0 18px;">
+                                        <path d="M2.5 2.5L15.5 15.5M15.5 2.5L2.5 15.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                    </svg>
                                 </a>
                             </div>
                         </div>
 
                         <div class="result-card result-card-danger relative radius-12 bg-danger color-white">
                             <div class="result-card--img">
-                                <i class="icon icon-close medium"></i>
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" style="display:block;">
+                                    <path d="M3 3L17 17M17 3L3 17" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/>
+                                </svg>
                             </div>
 
                             <div class="result-card-danger--title text-large helvetica-75 font-bold color-white">
