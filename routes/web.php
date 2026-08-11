@@ -5,7 +5,7 @@ use App\Http\Controllers\Front\DocumentDownloadController;
 use App\Http\Controllers\Front\HomeController;
 use Illuminate\Support\Facades\Route;
 
-Route::redirect('/', '/en');
+Route::redirect('/', '/en/');
 
 Route::get('/{locale}/about', [ContentPageController::class, 'about'])
     ->whereIn('locale', ['am', 'en', 'ru'])
