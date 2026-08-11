@@ -14,22 +14,16 @@ use Illuminate\Database\Eloquent\Attributes\Hidden;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Fortify\TwoFactorAuthenticatable;
 
 #[Fillable([
     'name',
     'email',
     'password',
+    'is_admin',
 ])]
 #[Hidden([
     'password',
     'remember_token',
-
-    // Fortify
-    'two_factor_secret',
-    'two_factor_recovery_codes',
-
-    // Filament MFA
     'app_authentication_secret',
     'app_authentication_recovery_codes',
 ])]
@@ -41,8 +35,6 @@ class User extends Authenticatable implements
     /** @use HasFactory<UserFactory> */
     use HasFactory;
     use Notifiable;
-    use TwoFactorAuthenticatable;
-
     use InteractsWithAppAuthentication;
     use InteractsWithAppAuthenticationRecovery;
 
