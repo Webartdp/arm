@@ -71,7 +71,10 @@ class DocumentResource extends Resource
                             ->helperText('Можно оставить пустым — уникальный код будет создан автоматически.')
                             ->maxLength(19)
                             ->unique(ignoreRecord: true)
-                            ->rule('nullable|regex:/^[A-Za-z0-9]{4}(?:-[A-Za-z0-9]{4}){3}$/'),
+                            ->rules([
+                                'nullable',
+                                'regex:/^[A-Za-z0-9]{4}(?:-[A-Za-z0-9]{4}){3}$/',
+                            ]),
 
                         Select::make('status')
                             ->label('Статус')
