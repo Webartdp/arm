@@ -17,6 +17,8 @@ class Document extends Model
         return [
             'issue_date' => 'date',
             'valid_until' => 'date',
+            'birth_date' => 'date',
+            'registration_date' => 'date',
             'metadata' => 'array',
         ];
     }
