@@ -50,9 +50,55 @@
         ],
     ];
 
+    $verificationCopy = [
+        'en' => [
+            'valid' => ['Document found', 'The document record is active in this verification service.'],
+            'revoked' => ['Document revoked', 'This document record has been revoked.'],
+            'expired' => ['Document expired', 'The validity period of this document record has expired.'],
+            'draft' => ['Document unavailable', 'This document record is not published for verification.'],
+            'not_found' => ['Document not found', 'No document record was found for the entered code.'],
+            'invalid' => ['Invalid code', 'Enter a complete 16-character verification code.'],
+            'date_mismatch' => ['Issue date does not match', 'The entered issue date does not match the document record.'],
+            'code' => 'Verification code',
+            'type' => 'Document type',
+            'title' => 'Document',
+            'issued' => 'Issue date',
+            'valid_until' => 'Valid until',
+        ],
+        'ru' => [
+            'valid' => ['Документ найден', 'Запись документа активна в этой системе проверки.'],
+            'revoked' => ['Документ аннулирован', 'Запись этого документа была аннулирована.'],
+            'expired' => ['Срок действия истёк', 'Срок действия записи этого документа истёк.'],
+            'draft' => ['Документ недоступен', 'Запись документа пока не опубликована для проверки.'],
+            'not_found' => ['Документ не найден', 'По введённому коду запись документа не найдена.'],
+            'invalid' => ['Некорректный код', 'Введите полный 16-значный код проверки.'],
+            'date_mismatch' => ['Дата выдачи не совпадает', 'Введённая дата выдачи не совпадает с записью документа.'],
+            'code' => 'Код проверки',
+            'type' => 'Тип документа',
+            'title' => 'Документ',
+            'issued' => 'Дата выдачи',
+            'valid_until' => 'Действителен до',
+        ],
+        'am' => [
+            'valid' => ['Փաստաթուղթը գտնվել է', 'Փաստաթղթի գրառումը ակտիվ է այս ստուգման համակարգում։'],
+            'revoked' => ['Փաստաթուղթը չեղարկված է', 'Այս փաստաթղթի գրառումը չեղարկված է։'],
+            'expired' => ['Վավերականության ժամկետը լրացել է', 'Այս փաստաթղթի գրառման վավերականության ժամկետը լրացել է։'],
+            'draft' => ['Փաստաթուղթը հասանելի չէ', 'Փաստաթղթի գրառումը դեռ հրապարակված չէ ստուգման համար։'],
+            'not_found' => ['Փաստաթուղթը չի գտնվել', 'Մուտքագրված կոդով փաստաթղթի գրառում չի գտնվել։'],
+            'invalid' => ['Սխալ կոդ', 'Մուտքագրեք ամբողջական 16 նիշանոց ստուգման կոդը։'],
+            'date_mismatch' => ['Տրման ամսաթիվը չի համընկնում', 'Մուտքագրված տրման ամսաթիվը չի համընկնում փաստաթղթի գրառման հետ։'],
+            'code' => 'Ստուգման կոդ',
+            'type' => 'Փաստաթղթի տեսակ',
+            'title' => 'Փաստաթուղթ',
+            'issued' => 'Տրման ամսաթիվ',
+            'valid_until' => 'Վավեր է մինչև',
+        ],
+    ];
+
     $d = $defaults[$locale] ?? $defaults['en'];
+    $v = $verificationCopy[$locale] ?? $verificationCopy['en'];
     $tnum = request('tnum', $tnum ?? '');
-    $date = request('date', '');
+    $date = request('date', $date ?? '');
 @endphp
 <!doctype html>
 <html lang="{{ $locale === 'am' ? 'hy' : $locale }}">
@@ -167,7 +213,11 @@
             <div class="loading-target">
                 <div class="verify-card dynamic-view relative radius-12 bg-grey-5">
                     <div class="verify-card--img hide-sm show-md">
-                        <img src="/static/img/certificate.svg" alt="">
+                        @if($settings->hero_image)
+                            <img src="{{ asset('storage/' . $settings->hero_image) }}" alt="">
+                        @else
+                            <img src="/static/img/certificate.svg" alt="">
+                        @endif
                     </div>
 
                     <div class="verify-card-heading text-center">
@@ -222,6 +272,84 @@
                 <div class="text-xsmall helvetica-55 text-height-125 color-grey-60 font-spacing-01 verify-card-desc text-center show-sm hide-md">
                     {{ $field('helper_text', $d['helper_text']) }}
                 </div>
+
+                @if($verificationResult)
+                    @php
+                        [$resultTitle, $resultText] = $v[$verificationResult] ?? $v['invalid'];
+                        $resultBorder = $verificationResult === 'valid' ? '#18BBB4' : ($verificationResult === 'expired' || $verificationResult === 'draft' ? '#d69e2e' : '#E43F5A');
+                    @endphp
+
+                    <div class="response-card dynamic-view">
+                        <div class="row align-center">
+                            <div class="column small-14 large-10 x-large-8">
+                                <div class="result-card radius-12 bg-white" style="border-top: 4px solid {{ $resultBorder }};">
+                                    <div class="result-card--title text-large helvetica-75 font-bold color-grey text-center">
+                                        {{ $resultTitle }}
+                                    </div>
+
+                                    <div class="text-small helvetica-55 color-grey-60 text-center">
+                                        {{ $resultText }}
+                                    </div>
+
+                                    @if($document && in_array($verificationResult, ['valid', 'expired', 'revoked'], true))
+                                        <div class="info-item">
+                                            <div class="info-item--title text-xsmall helvetica-65 color-grey-60">
+                                                {{ $v['code'] }}
+                                            </div>
+                                            <div class="text-small helvetica-55 color-grey">
+                                                {{ $document->tracking_number }}
+                                            </div>
+                                        </div>
+
+                                        @if($document->document_type)
+                                            <div class="info-item">
+                                                <div class="info-item--title text-xsmall helvetica-65 color-grey-60">
+                                                    {{ $v['type'] }}
+                                                </div>
+                                                <div class="text-small helvetica-55 color-grey">
+                                                    {{ $document->document_type }}
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if($document->title)
+                                            <div class="info-item">
+                                                <div class="info-item--title text-xsmall helvetica-65 color-grey-60">
+                                                    {{ $v['title'] }}
+                                                </div>
+                                                <div class="text-small helvetica-55 color-grey">
+                                                    {{ $document->title }}
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if($document->issue_date)
+                                            <div class="info-item">
+                                                <div class="info-item--title text-xsmall helvetica-65 color-grey-60">
+                                                    {{ $v['issued'] }}
+                                                </div>
+                                                <div class="text-small helvetica-55 color-grey">
+                                                    {{ $document->issue_date->format('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        @if($document->valid_until)
+                                            <div class="info-item">
+                                                <div class="info-item--title text-xsmall helvetica-65 color-grey-60">
+                                                    {{ $v['valid_until'] }}
+                                                </div>
+                                                <div class="text-small helvetica-55 color-grey">
+                                                    {{ $document->valid_until->format('d/m/Y') }}
+                                                </div>
+                                            </div>
+                                        @endif
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endif
             </div>
 
             <div class="dynamic-view loading-card relative text-center">
@@ -237,6 +365,22 @@
 </main>
 
 <footer class="text-center">
+    @if($settings->footer_left_image || $settings->footer_right_image)
+        <div class="row align-center" style="margin-bottom: 16px;">
+            @if($settings->footer_left_image)
+                <div class="column small-6 large-3">
+                    <img src="{{ asset('storage/' . $settings->footer_left_image) }}" alt="" style="max-height: 64px;">
+                </div>
+            @endif
+
+            @if($settings->footer_right_image)
+                <div class="column small-6 large-3">
+                    <img src="{{ asset('storage/' . $settings->footer_right_image) }}" alt="" style="max-height: 64px;">
+                </div>
+            @endif
+        </div>
+    @endif
+
     <div class="row align-center">
         <div class="column small-12 large-6">
             <div class="text-small text-height-150 helvetica-55 color-grey-40 font-spacing-01 footer-copyright">
@@ -247,7 +391,7 @@
 
         <div class="column small-12 large-12">
             <div class="text-xsmall text-height-160 helvetica-55 color-grey-40 font-spacing-01 footer-copyright">
-                {{ $field('footer_address', $d['footer_address']) }}
+                {!! nl2br(e($field('footer_address', $d['footer_address']))) !!}
 
                 @if($settings->footer_email)
                     <div style="margin-top: 12px;">
