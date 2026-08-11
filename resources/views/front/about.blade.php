@@ -80,7 +80,7 @@
     <title>{{ $field('about_seo_title', $field('about_title', $d['about_title'])) }}</title>
     <meta name="description" content="{{ $field('about_seo_description', $field('about_intro', $d['about_intro'])) }}">
     @if($settings->favicon)<link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">@endif
-    <link rel="stylesheet" href="/static/css/app.min.css?v=3">
+    <link rel="stylesheet" href="/static/css/app.min.css?v=2">
     <style>
         .about-hero{height:176px;position:relative;background-image:url('/static/img/docs.jpg');background-position:center;background-size:cover;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff}
         .about-hero:before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.5)}
@@ -101,71 +101,6 @@
         .about-verify{margin-top:86px}
         .about-verify .verify-card{margin-top:0}
         @media(max-width:768px){.about-hero{height:155px}.about-hero__name{font-size:29px}.about-hero__title,.about-hero__subtitle{font-size:13px}.about-content{margin-top:42px}.about-heading-row{align-items:flex-start;gap:18px}.about-badge{width:74px;flex-basis:74px}.about-heading{font-size:19px}.about-copy{font-size:14px}}
-    
-        header{position:relative;z-index:50;background:#fff}
-        header .flex-container.align-middle.medium-align-justify.z-first.relative{
-            min-height:94px;
-            position:relative;
-            padding:0 30px;
-        }
-        .header-logo{
-            position:absolute;
-            left:50%;
-            bottom:-28px;
-            transform:translateX(-50%);
-            z-index:60;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            margin:0;
-        }
-        .header-logo--img{
-            width:108px;
-            height:108px;
-            border-radius:9999px;
-            background:#fff;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            overflow:hidden;
-            box-shadow:0 6px 16px rgba(0,0,0,.12);
-        }
-        .header-logo--img img{
-            display:block;
-            width:auto;
-            height:auto;
-            max-width:62px;
-            max-height:62px;
-        }
-        .header-logo--text{display:none!important}
-        .about-hero{margin-top:0}
-        .about-hero__inner{
-            position:relative;
-            z-index:1;
-            padding:58px 24px 14px;
-        }
-
-        @media(max-width:768px){
-            header .flex-container.align-middle.medium-align-justify.z-first.relative{
-                min-height:82px;
-                padding:0 16px;
-            }
-            .header-logo{
-                bottom:-24px;
-            }
-            .header-logo--img{
-                width:94px;
-                height:94px;
-            }
-            .header-logo--img img{
-                max-width:54px;
-                max-height:54px;
-            }
-            .about-hero__inner{
-                padding:54px 10px 10px;
-            }
-        }
-
     </style>
 </head>
 <body>
@@ -188,7 +123,9 @@
         <div class="lang relative color-grey-60">
             <div class="lang--selected has-drop cursor-pointer"><div class="flex-container align-middle helvetica-65 font-uppercase font-spacing-01 color-inherit lang-item"><i class="icon icon-globe small"></i>{{ $locale }}</div></div>
             <div class="lang--dropdown dropper bg-white shadow-primary">
-                @foreach(['am', 'en', 'ru'] as $code)<a href="{{ route('front.about', ['locale' => $code]) }}" class="flex-container align-middle helvetica-65 font-uppercase font-spacing-01 color-grey lang-item">{{ $code }}</a>@endforeach
+                @foreach(['am', 'en', 'ru'] as $code)
+                    <a href="{{ route('front.about', ['locale' => $code]) }}" class="flex-container align-middle helvetica-65 font-uppercase font-spacing-01 color-grey lang-item">{{ $code }}</a>
+                @endforeach
             </div>
         </div>
     </div>
@@ -214,7 +151,6 @@
             </div>
             <h2 class="about-heading helvetica-55">{{ $field('about_title', $d['about_title']) }}</h2>
         </div>
-
         <div class="about-copy helvetica-55">
             <p>{!! nl2br(e($field('about_intro', $d['about_intro']))) !!}</p>
             <p class="about-list-title">{{ $field('about_list_title', $d['about_list_title']) }}</p>
@@ -258,12 +194,12 @@
     </div>
 </footer>
 
-<script src="/static/js/Chart.min.js?v=3"></script>
+<script src="/static/js/Chart.min.js?v=2"></script>
 <script>
 window.imgPath='/static/img';
-async function fetchComponentStyles(){const response=await fetch('/static/css/z-components.min.css?v=3');return await response.text();}
+async function fetchComponentStyles(){const response=await fetch('/static/css/z-components.min.css?v=2');return await response.text();}
 function bindVerificationForm(){const button=document.querySelector('z-button');const component=document.getElementById('component');const form=document.getElementById('verification-form');if(!button||!component||!form||button.dataset.verifyBound==='1')return;button.dataset.verifyBound='1';button.addEventListener('click',function(event){event.preventDefault();const root=component.shadowRoot;if(!root)return;document.getElementById('tracking_num').value=[0,1,2,3].map(index=>root.querySelector('[name="q'+index+'"]')?.value??'').join('-');document.getElementById('issue_date').value=root.querySelector('#datepicker-component')?.value??'';form.submit();});}
-fetchComponentStyles().then(styles=>{window.cssPath=styles;const componentsScript=document.createElement('script');componentsScript.src='/static/js/z-components.min.js?v=3';componentsScript.onload=()=>{const appScript=document.createElement('script');appScript.src='/static/js/app.min.js?v=3';document.head.appendChild(appScript);let attempts=0;const timer=setInterval(()=>{attempts++;bindVerificationForm();if(document.querySelector('z-button')?.dataset.verifyBound==='1'||attempts>=30)clearInterval(timer);},100);};document.head.appendChild(componentsScript);});
+fetchComponentStyles().then(styles=>{window.cssPath=styles;const componentsScript=document.createElement('script');componentsScript.src='/static/js/z-components.min.js?v=2';componentsScript.onload=()=>{const appScript=document.createElement('script');appScript.src='/static/js/app.min.js?v=2';document.head.appendChild(appScript);let attempts=0;const timer=setInterval(()=>{attempts++;bindVerificationForm();if(document.querySelector('z-button')?.dataset.verifyBound==='1'||attempts>=30)clearInterval(timer);},100);};document.head.appendChild(componentsScript);});
 </script>
 </body>
 </html>
