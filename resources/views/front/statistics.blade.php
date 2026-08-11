@@ -12,9 +12,7 @@
             'hero_subtitle' => 'unified system for checking the validity of documents',
             'nav_about' => 'About',
             'nav_statistics' => 'Statistics',
-            'statistics_title' => 'Visitors by Countries',
-            'statistics_intro' => '',
-            'empty' => 'Statistics are not available yet.',
+            'statistics_title' => 'Statistics',
             'footer_title' => 'DOCUMENT VERIFICATION SERVICE',
             'copyright' => 'All rights reserved',
             'footer_address' => 'Contact information',
@@ -26,9 +24,7 @@
             'hero_subtitle' => 'единая система проверки действительности документов',
             'nav_about' => 'О системе',
             'nav_statistics' => 'Статистика',
-            'statistics_title' => 'Посетители сайта по странам',
-            'statistics_intro' => '',
-            'empty' => 'Статистика пока не заполнена.',
+            'statistics_title' => 'Статистика',
             'footer_title' => 'СЛУЖБА ПРОВЕРКИ ДОКУМЕНТОВ',
             'copyright' => 'Все права защищены',
             'footer_address' => 'Контактная информация',
@@ -40,9 +36,7 @@
             'hero_subtitle' => 'փաստաթղթերի վավերականության միասնական ստուգման համակարգ',
             'nav_about' => 'Համակարգի մասին',
             'nav_statistics' => 'Վիճակագրություն',
-            'statistics_title' => 'Այցելուներն ըստ երկրների',
-            'statistics_intro' => '',
-            'empty' => 'Վիճակագրությունը դեռ լրացված չէ։',
+            'statistics_title' => 'Վիճակագրություն',
             'footer_title' => 'ՓԱՍՏԱԹՂԹԵՐԻ ՍՏՈՒԳՄԱՆ ԾԱՌԱՅՈՒԹՅՈՒՆ',
             'copyright' => 'Բոլոր իրավունքները պաշտպանված են',
             'footer_address' => 'Կոնտակտային տվյալներ',
@@ -51,20 +45,27 @@
     ];
 
     $d = $defaults[$locale] ?? $defaults['en'];
-    $items = $settings->{"statistics_items_{$locale}"} ?: [];
 
-    $chartLabels = [];
-    $chartValues = [];
-
-    foreach ($items as $item) {
-        $country = trim((string) ($item['country'] ?? ''));
-        $value = isset($item['value']) ? (float) $item['value'] : 0;
-
-        if ($country !== '' && $value > 0) {
-            $chartLabels[] = $country;
-            $chartValues[] = $value;
-        }
-    }
+    $chartCopy = [
+        'ru' => [
+            'visits' => 'Количество посещений сайта по месяцам',
+            'documents' => 'Количество документов, проверенных на сайте за 12 месяцев по типам',
+            'months' => ['Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль'],
+            'diplomas' => 'Дипломы и аттестаты',
+        ],
+        'en' => [
+            'visits' => 'Number of website visits by month',
+            'documents' => 'Number of documents verified on the website over 12 months by type',
+            'months' => ['February', 'March', 'April', 'May', 'June', 'July'],
+            'diplomas' => 'Diplomas and certificates',
+        ],
+        'am' => [
+            'visits' => 'Կայքի այցելությունների քանակն ըստ ամիսների',
+            'documents' => 'Կայքում 12 ամսվա ընթացքում ստուգված փաստաթղթերի քանակն ըստ տեսակների',
+            'months' => ['Փետրվար', 'Մարտ', 'Ապրիլ', 'Մայիս', 'Հունիս', 'Հուլիս'],
+            'diplomas' => 'Դիպլոմներ և վկայականներ',
+        ],
+    ][$locale] ?? null;
 @endphp
 <!doctype html>
 <html lang="{{ $locale === 'am' ? 'hy' : $locale }}">
@@ -74,8 +75,8 @@
     <meta name="referrer" content="origin-when-cross-origin">
     <meta name="robots" content="index,follow">
 
-    <title>{{ $field('statistics_seo_title', $field('statistics_title', $d['statistics_title'])) }}</title>
-    <meta name="description" content="{{ $field('statistics_seo_description', $field('statistics_intro', $d['statistics_intro'])) }}">
+    <title>{{ $field('statistics_seo_title', $d['statistics_title']) }}</title>
+    <meta name="description" content="{{ $field('statistics_seo_description', $d['hero_subtitle']) }}">
 
     @if($settings->favicon)
         <link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">
@@ -84,80 +85,22 @@
     <link rel="stylesheet" href="/static/css/app.min.css?v=2">
 
     <style>
-        .statistics-wrap{margin-top:72px;margin-bottom:72px}
-        .statistics-title{margin-bottom:42px}
-        .statistics-intro{margin:-22px 0 42px}
-
-        .statistics-body{
-            display:grid;
-            grid-template-columns:minmax(300px,420px) minmax(0,1fr);
-            gap:70px;
-            align-items:center;
-        }
-
-        .statistics-chart{
-            position:relative;
+        .statistics-exact-wrap{
             width:100%;
-            max-width:410px;
-            height:410px;
-            margin:0 auto;
+            max-width:945px;
+            margin:40px auto 70px;
+            padding:0;
+            overflow:hidden;
         }
-
-        .statistics-chart canvas{
-            width:100%!important;
-            height:100%!important;
+        .statistics-exact-canvas{
+            display:block;
+            width:100%;
+            height:auto;
+            background:#fff;
         }
-
-        .statistics-list{margin:0;padding:0;list-style:none}
-
-        .statistics-item{
-            display:flex;
-            align-items:center;
-            justify-content:space-between;
-            gap:24px;
-            min-height:48px;
-            padding:10px 0;
-            background:url('/static/img/dot-x-long.png') bottom/100% no-repeat;
-        }
-
-        .statistics-item:last-child{background:none}
-
-        .statistics-country{
-            display:flex;
-            align-items:center;
-            gap:14px;
-            min-width:0;
-        }
-
-        .statistics-marker{
-            width:38px;
-            height:28px;
-            border-radius:4px;
-            background:#f5f5f5;
-            display:flex;
-            align-items:center;
-            justify-content:center;
-            color:#125C94;
-            flex:0 0 38px;
-        }
-
-        .statistics-value{
-            min-width:72px;
-            text-align:right;
-            font-weight:700;
-        }
-
-        @media(max-width:900px){
-            .statistics-body{grid-template-columns:1fr;gap:42px}
-            .statistics-chart{max-width:360px;height:360px}
-        }
-
-        @media(max-width:600px){
-            .statistics-wrap{margin-top:45px;margin-bottom:45px}
-            .statistics-title{margin-bottom:28px}
-            .statistics-chart{max-width:290px;height:290px}
-            .statistics-item{padding:9px 0}
-            .statistics-marker{width:32px;height:24px;flex-basis:32px}
+        @media(max-width:700px){
+            .statistics-exact-wrap{margin-top:28px;margin-bottom:45px;overflow-x:auto}
+            .statistics-exact-canvas{width:945px;max-width:none}
         }
     </style>
 </head>
@@ -213,44 +156,8 @@
         </div>
     </div>
 
-    <div class="row align-center statistics-wrap">
-        <div class="column small-14 large-12 x-large-10">
-            <div class="statistics-title text-center">
-                <div class="text-large helvetica-75 font-bold color-grey">{{ $field('statistics_title', $d['statistics_title']) }}</div>
-            </div>
-
-            @if($field('statistics_intro', $d['statistics_intro']))
-                <div class="statistics-intro text-small helvetica-55 text-height-160 color-grey-60 text-center">
-                    {!! nl2br(e($field('statistics_intro', $d['statistics_intro']))) !!}
-                </div>
-            @endif
-
-            @if(count($items))
-                <div class="statistics-body">
-                    <div class="statistics-chart">
-                        <canvas id="statisticsCountriesChart" aria-label="{{ $field('statistics_title', $d['statistics_title']) }}"></canvas>
-                    </div>
-
-                    <ul class="statistics-list">
-                        @foreach($items as $item)
-                            @php
-                                $country = $item['country'] ?? '';
-                                $value = isset($item['value']) ? (float) $item['value'] : 0;
-                            @endphp
-                            <li class="statistics-item">
-                                <div class="statistics-country text-small helvetica-55 color-grey">
-                                    <span class="statistics-marker"><i class="icon icon-flag small"></i></span>
-                                    <span>{{ $country }}</span>
-                                </div>
-                                <div class="statistics-value text-small helvetica-65 color-grey">{{ rtrim(rtrim(number_format($value, 2, '.', ''), '0'), '.') }}%</div>
-                            </li>
-                        @endforeach
-                    </ul>
-                </div>
-            @else
-                <div class="text-small helvetica-55 color-grey-60 text-center">{{ $d['empty'] }}</div>
-            @endif
-        </div>
+    <div class="statistics-exact-wrap">
+        <canvas id="statisticsExactCanvas" class="statistics-exact-canvas" width="945" height="845" aria-label="{{ $d['statistics_title'] }}"></canvas>
     </div>
 </main>
 
@@ -272,69 +179,159 @@
     </div>
 </footer>
 
-<script src="/static/js/Chart.min.js?v=2"></script>
 <script>
 (function () {
-    var canvas = document.getElementById('statisticsCountriesChart');
+    var canvas = document.getElementById('statisticsExactCanvas');
+    if (!canvas || !canvas.getContext) return;
 
-    if (!canvas || typeof Chart === 'undefined') {
-        return;
+    var ctx = canvas.getContext('2d');
+    var copy = @json($chartCopy, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+
+    var W = 945;
+    var H = 845;
+
+    function line(x1, y1, x2, y2, color, width) {
+        ctx.beginPath();
+        ctx.moveTo(x1 + 0.5, y1 + 0.5);
+        ctx.lineTo(x2 + 0.5, y2 + 0.5);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = width || 1;
+        ctx.stroke();
     }
 
-    var labels = @json($chartLabels, JSON_UNESCAPED_UNICODE);
-    var values = @json($chartValues);
-
-    if (!labels.length || !values.length) {
-        return;
+    function text(value, x, y, font, color, align, baseline) {
+        ctx.font = font;
+        ctx.fillStyle = color || '#222';
+        ctx.textAlign = align || 'left';
+        ctx.textBaseline = baseline || 'alphabetic';
+        ctx.fillText(value, x, y);
     }
 
-    var palette = [
-        '#18BBB4', '#125C94', '#FAA61A', '#EB5757', '#7B61FF',
-        '#56CCF2', '#6FCF97', '#F2C94C', '#BB6BD9', '#2D9CDB',
-        '#27AE60', '#F2994A', '#9B51E0', '#828282', '#D6D6D6'
+    function mixedMonthLabel(month, year, centerX, y) {
+        ctx.textBaseline = 'alphabetic';
+        ctx.textAlign = 'left';
+        ctx.font = '13px Arial, sans-serif';
+        var monthWidth = ctx.measureText(month + ' ').width;
+        ctx.font = '700 13px Arial, sans-serif';
+        var yearWidth = ctx.measureText(year).width;
+        var startX = centerX - (monthWidth + yearWidth) / 2;
+
+        ctx.font = '13px Arial, sans-serif';
+        ctx.fillStyle = '#222';
+        ctx.fillText(month + ' ', startX, y);
+        ctx.font = '700 13px Arial, sans-serif';
+        ctx.fillText(year, startX + monthWidth, y);
+    }
+
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, W, H);
+
+    /* FIRST CHART */
+    text(copy.visits, 472.5, 20, '700 20px Arial, sans-serif', '#222', 'center');
+
+    var left1 = 94;
+    var right1 = 859;
+    var top1 = 55;
+    var bottom1 = 361;
+    var yStep = 51;
+    var yValues = [12000, 10000, 8000, 6000, 4000, 2000, 0];
+
+    for (var i = 0; i < yValues.length; i++) {
+        var gy = top1 + (i * yStep);
+        line(left1, gy, right1, gy, '#dedede', 1);
+        text(String(yValues[i]), 84, gy, '12px Arial, sans-serif', '#444', 'right', 'middle');
+    }
+
+    line(left1, top1, left1, bottom1, '#d3d3d3', 1);
+    line(left1, bottom1, right1, bottom1, '#cfcfcf', 1);
+
+    var points = [
+        {x:94,  y:277},
+        {x:247, y:72},
+        {x:400, y:102},
+        {x:553, y:98},
+        {x:706, y:87},
+        {x:859, y:320}
     ];
 
-    new Chart(canvas.getContext('2d'), {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: [{
-                data: values,
-                backgroundColor: labels.map(function (_, index) {
-                    return palette[index % palette.length];
-                }),
-                borderWidth: 0,
-                hoverBorderWidth: 0
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            cutoutPercentage: 63,
-            animation: {
-                animateRotate: true,
-                animateScale: false
-            },
-            legend: {
-                display: false
-            },
-            tooltips: {
-                backgroundColor: '#ffffff',
-                titleFontColor: '#3f4651',
-                bodyFontColor: '#3f4651',
-                borderColor: '#e5e7eb',
-                borderWidth: 1,
-                displayColors: true,
-                callbacks: {
-                    label: function (tooltipItem, data) {
-                        var label = data.labels[tooltipItem.index] || '';
-                        var value = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
-                        return ' ' + label + ': ' + value + '%';
-                    }
-                }
-            }
-        }
-    });
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, bottom1);
+    for (var p = 0; p < points.length; p++) ctx.lineTo(points[p].x, points[p].y);
+    ctx.lineTo(points[points.length - 1].x, bottom1);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(13, 87, 145, 0.08)';
+    ctx.fill();
+
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    for (var p2 = 1; p2 < points.length; p2++) ctx.lineTo(points[p2].x, points[p2].y);
+    ctx.strokeStyle = '#075b9b';
+    ctx.lineWidth = 3;
+    ctx.lineJoin = 'round';
+    ctx.lineCap = 'round';
+    ctx.stroke();
+
+    for (var p3 = 0; p3 < points.length; p3++) {
+        ctx.beginPath();
+        ctx.arc(points[p3].x, points[p3].y, 5.5, 0, Math.PI * 2);
+        ctx.fillStyle = '#075b91';
+        ctx.fill();
+        ctx.strokeStyle = '#064d79';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+    }
+
+    var months = copy.months;
+    var monthX = [94, 247, 400, 553, 706, 859];
+    for (var m = 0; m < months.length; m++) mixedMonthLabel(months[m], '2023', monthX[m], 385);
+
+    /* SECOND CHART */
+    text(copy.documents, 472.5, 444, '700 20px Arial, sans-serif', '#222', 'center');
+
+    var left2 = 247;
+    var right2 = 884;
+    var top2 = 480;
+    var bottom2 = 773;
+    var max2 = 2262000;
+    var step2 = 78000;
+    var tickCount2 = max2 / step2;
+
+    for (var t = 0; t <= tickCount2; t++) {
+        var gx = left2 + ((right2 - left2) * t / tickCount2);
+        line(gx, top2, gx, bottom2, '#dedede', 1);
+
+        ctx.save();
+        ctx.translate(gx, 787);
+        ctx.rotate(-Math.PI / 4);
+        text(String(t * step2), 0, 0, '700 13px Arial, sans-serif', '#222', 'right', 'middle');
+        ctx.restore();
+    }
+
+    var labels2 = ['BY', 'MD', 'FA', 'UG', 'NT', 'EJ', 'EH', 'AP', copy.diplomas];
+    var labelY = [489, 523, 558, 593, 628, 663, 697, 732, 766];
+
+    for (var l = 0; l < labels2.length; l++) {
+        var isLast = l === labels2.length - 1;
+        text(labels2[l], 238, labelY[l], isLast ? '14px Arial, sans-serif' : '700 16px Arial, sans-serif', '#222', 'right', 'middle');
+    }
+
+    /* Static bar geometry copied from the reference chart. */
+    ctx.fillStyle = 'rgba(188, 188, 188, 0.46)';
+    var bars = [
+        {x1:247, x2:253, y:646, h:17},
+        {x1:247, x2:267, y:664, h:17},
+        {x1:247, x2:304, y:681, h:17},
+        {x1:247, x2:308, y:698, h:17},
+        {x1:247, x2:357, y:715, h:18},
+        {x1:247, x2:840, y:733, h:17},
+        {x1:247, x2:884, y:750, h:13},
+        {x1:247, x2:884, y:762, h:12}
+    ];
+
+    for (var b = 0; b < bars.length; b++) {
+        ctx.fillRect(bars[b].x1, bars[b].y, bars[b].x2 - bars[b].x1, bars[b].h);
+    }
 })();
 </script>
 <script src="/static/js/app.min.js?v=2"></script>
