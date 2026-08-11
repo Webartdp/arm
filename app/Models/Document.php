@@ -1,0 +1,94 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+class Document extends Model
+{
+    use SoftDeletes;
+
+    protected $guarded = [];
+
+    protected function casts(): array
+    {
+        return [
+            'issue_date' => 'date',
+            'valid_until' => 'date',
+            'metadata' => 'array',
+        ];
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Document $document): void {
+            if (blank($document->tracking_number)) {
+                $document->tracking_number = static::generateTrackingNumber();
+            }
+
+            if (auth()->check()) {
+                $document->created_by ??= auth()->id();
+                $document->updated_by = auth()->id();
+            }
+        });
+
+        static::saving(function (Document $document): void {
+            if (filled($document->tracking_number)) {
+                $document->tracking_number = static::normalizeTrackingNumber($document->tracking_number);
+            }
+
+            if ($document->exists && auth()->check()) {
+                $document->updated_by = auth()->id();
+            }
+        });
+    }
+
+    public static function normalizeTrackingNumber(string $value): string
+    {
+        $plain = preg_replace('/[^A-Z0-9]/', '', strtoupper($value)) ?? '';
+
+        return implode('-', str_split(substr($plain, 0, 16), 4));
+    }
+
+    public static function generateTrackingNumber(): string
+    {
+        $alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+
+        do {
+            $plain = '';
+
+            for ($i = 0; $i < 16; $i++) {
+                $plain .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+            }
+
+            $trackingNumber = implode('-', str_split($plain, 4));
+        } while (static::query()->withTrashed()->where('tracking_number', $trackingNumber)->exists());
+
+        return $trackingNumber;
+    }
+
+    public function getEffectiveStatusAttribute(): string
+    {
+        if ($this->status === 'revoked') {
+            return 'revoked';
+        }
+
+        if ($this->valid_until?->isPast()) {
+            return 'expired';
+        }
+
+        return $this->status === 'draft' ? 'draft' : 'active';
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function updater(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+}
