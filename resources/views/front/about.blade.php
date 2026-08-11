@@ -69,8 +69,6 @@
     $aboutItems = $settings->{"about_items_{$locale}"} ?: $d['about_items'];
     $tnum = request('tnum', '');
     $date = request('date', '');
-    $aboutBgPath = resource_path('assets/docs-bg.b64');
-    $aboutBg = is_file($aboutBgPath) ? trim(file_get_contents($aboutBgPath)) : '';
 @endphp
 <!doctype html>
 <html lang="{{ $locale === 'am' ? 'hy' : $locale }}">
@@ -84,7 +82,7 @@
     @if($settings->favicon)<link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">@endif
     <link rel="stylesheet" href="/static/css/app.min.css?v=3">
     <style>
-        .about-hero{height:176px;position:relative;background-position:center;background-size:cover;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff}
+        .about-hero{height:176px;position:relative;background-image:url('/static/img/docs.jpg');background-position:center;background-size:cover;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff}
         .about-hero:before{content:'';position:absolute;inset:0;background:rgba(0,0,0,.5)}
         .about-hero__inner{position:relative;z-index:1;padding:15px 24px}
         .about-hero__name{margin:0 0 8px;font-size:40px;line-height:1.1;font-weight:900;letter-spacing:-1.5px;text-shadow:2px 2px 1px rgba(0,0,0,.65)}
@@ -132,7 +130,7 @@
 </header>
 
 <main>
-    <section class="about-hero" @if($aboutBg) style="background-image:url('data:image/jpeg;base64,{{ $aboutBg }}')" @endif>
+    <section class="about-hero">
         <div class="about-hero__inner">
             <h1 class="about-hero__name helvetica-95">{{ $field('site_name', $d['site_name']) }}</h1>
             <div class="about-hero__title helvetica-75">{{ $field('hero_title', $d['hero_title']) }}</div>
