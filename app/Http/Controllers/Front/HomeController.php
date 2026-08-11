@@ -89,7 +89,11 @@ class HomeController extends Controller
             ]);
         }
 
-        return view('front.home', compact(
+        $view = $verificationResult === 'not_found'
+            ? 'front.not-found'
+            : 'front.home';
+
+        return view($view, compact(
             'settings',
             'locale',
             'tnum',
