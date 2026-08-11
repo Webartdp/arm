@@ -88,6 +88,16 @@ class DocumentResource extends Resource
                             ->required()
                             ->native(false),
 
+                        Select::make('document_kind')
+                            ->label('Шаблон результата проверки')
+                            ->options([
+                                'generic' => 'Обычный документ',
+                                'birth_certificate' => 'Свидетельство о рождении',
+                            ])
+                            ->default('generic')
+                            ->required()
+                            ->native(false),
+
                         TextInput::make('document_type')
                             ->label('Тип документа')
                             ->maxLength(255),
@@ -109,6 +119,78 @@ class DocumentResource extends Resource
                             ->afterOrEqual('issue_date'),
                     ]),
 
+                Section::make('Свидетельство о рождении — данные гражданина')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('citizen_first_name')
+                            ->label('Имя')
+                            ->maxLength(255),
+                        TextInput::make('citizen_patronymic')
+                            ->label('Отчество')
+                            ->maxLength(255),
+                        TextInput::make('citizen_last_name')
+                            ->label('Фамилия')
+                            ->maxLength(255),
+                        TextInput::make('citizen_nationality')
+                            ->label('Национальность')
+                            ->maxLength(255),
+                        TextInput::make('citizen_citizenship')
+                            ->label('Гражданство')
+                            ->maxLength(255),
+                        DatePicker::make('birth_date')
+                            ->label('Дата рождения'),
+                        TextInput::make('birth_place')
+                            ->label('Место рождения')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Свидетельство о рождении — родители')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('father_first_name')
+                            ->label('Отец — имя')
+                            ->maxLength(255),
+                        TextInput::make('father_patronymic')
+                            ->label('Отец — отчество')
+                            ->maxLength(255),
+                        TextInput::make('father_last_name')
+                            ->label('Отец — фамилия')
+                            ->maxLength(255),
+                        TextInput::make('father_nationality')
+                            ->label('Отец — национальность')
+                            ->maxLength(255),
+                        TextInput::make('mother_first_name')
+                            ->label('Мать — имя')
+                            ->maxLength(255),
+                        TextInput::make('mother_patronymic')
+                            ->label('Мать — отчество')
+                            ->maxLength(255),
+                        TextInput::make('mother_last_name')
+                            ->label('Мать — фамилия')
+                            ->maxLength(255),
+                        TextInput::make('mother_nationality')
+                            ->label('Мать — национальность')
+                            ->maxLength(255),
+                    ]),
+
+                Section::make('Свидетельство о рождении — регистрационные данные')
+                    ->columns(2)
+                    ->schema([
+                        DatePicker::make('registration_date')
+                            ->label('Дата регистрации'),
+                        TextInput::make('registration_number')
+                            ->label('Номер регистрации')
+                            ->maxLength(255),
+                        TextInput::make('registration_authority')
+                            ->label('Орган регистрации')
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        TextInput::make('certificate_number')
+                            ->label('Номер свидетельства')
+                            ->maxLength(255),
+                    ]),
+
                 Section::make('Файл и служебная информация')
                     ->schema([
                         FileUpload::make('file_path')
@@ -121,12 +203,13 @@ class DocumentResource extends Resource
                                 'image/jpeg',
                                 'image/png',
                                 'image/webp',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
                             ])
                             ->maxSize(20480)
                             ->previewable(false)
                             ->downloadable()
                             ->preventFilePathTampering()
-                            ->helperText('PDF/JPG/PNG/WEBP, до 20 МБ. Файл хранится в приватном storage.'),
+                            ->helperText('PDF/JPG/PNG/WEBP/DOCX, до 20 МБ. Файл хранится в приватном storage.'),
 
                         FileUpload::make('download_archive_path')
                             ->label('ZIP-архив для публичного скачивания')
@@ -160,6 +243,14 @@ class DocumentResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->copyable(),
+
+                TextColumn::make('document_kind')
+                    ->label('Шаблон')
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'birth_certificate' => 'Свидетельство о рождении',
+                        default => 'Обычный',
+                    })
+                    ->toggleable(),
 
                 TextColumn::make('document_type')
                     ->label('Тип')
@@ -213,6 +304,12 @@ class DocumentResource extends Resource
                         'active' => 'Действителен',
                         'revoked' => 'Аннулирован',
                         'expired' => 'Истёк',
+                    ]),
+                SelectFilter::make('document_kind')
+                    ->label('Шаблон')
+                    ->options([
+                        'generic' => 'Обычный документ',
+                        'birth_certificate' => 'Свидетельство о рождении',
                     ]),
             ])
             ->recordActions([
