@@ -5,6 +5,7 @@ namespace App\Filament\Pages;
 use App\Models\SiteSetting;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -77,6 +78,14 @@ class ManageSiteSettings extends Page
 
                             FileUpload::make('hero_image')
                                 ->label('Изображение в блоке проверки')
+                                ->image()
+                                ->disk('public')
+                                ->directory('site')
+                                ->visibility('public')
+                                ->preventFilePathTampering(),
+
+                            FileUpload::make('about_image')
+                                ->label('Изображение страницы «О системе»')
                                 ->image()
                                 ->disk('public')
                                 ->directory('site')
@@ -186,6 +195,59 @@ class ManageSiteSettings extends Page
                             ->columnSpanFull(),
                     ]),
 
+                Section::make('Страница «О системе»')
+                    ->schema([
+                        TextInput::make("about_title_{$locale}")
+                            ->label('Заголовок страницы')
+                            ->maxLength(255),
+
+                        Textarea::make("about_intro_{$locale}")
+                            ->label('Основной текст')
+                            ->rows(6),
+
+                        Repeater::make("about_items_{$locale}")
+                            ->label('Список пунктов')
+                            ->simple(
+                                TextInput::make('text')
+                                    ->label('Пункт')
+                                    ->maxLength(500)
+                            )
+                            ->addActionLabel('Добавить пункт')
+                            ->reorderable(),
+                    ]),
+
+                Section::make('Страница «Статистика»')
+                    ->schema([
+                        TextInput::make("statistics_title_{$locale}")
+                            ->label('Заголовок страницы')
+                            ->maxLength(255),
+
+                        Textarea::make("statistics_intro_{$locale}")
+                            ->label('Поясняющий текст')
+                            ->rows(3),
+
+                        Repeater::make("statistics_items_{$locale}")
+                            ->label('Страны и проценты')
+                            ->schema([
+                                TextInput::make('country')
+                                    ->label('Страна')
+                                    ->required()
+                                    ->maxLength(255),
+
+                                TextInput::make('value')
+                                    ->label('Процент')
+                                    ->numeric()
+                                    ->minValue(0)
+                                    ->maxValue(100)
+                                    ->suffix('%')
+                                    ->required(),
+                            ])
+                            ->columns(2)
+                            ->itemLabel(fn (array $state): ?string => $state['country'] ?? null)
+                            ->addActionLabel('Добавить страну')
+                            ->reorderable(),
+                    ]),
+
                 Section::make('Футер')
                     ->columns(2)
                     ->schema([
@@ -206,12 +268,28 @@ class ManageSiteSettings extends Page
                 Section::make('SEO')
                     ->schema([
                         TextInput::make("seo_title_{$locale}")
-                            ->label('SEO Title')
+                            ->label('Главная — SEO Title')
                             ->maxLength(255),
 
                         Textarea::make("seo_description_{$locale}")
-                            ->label('SEO Description')
+                            ->label('Главная — SEO Description')
                             ->rows(3),
+
+                        TextInput::make("about_seo_title_{$locale}")
+                            ->label('О системе — SEO Title')
+                            ->maxLength(255),
+
+                        Textarea::make("about_seo_description_{$locale}")
+                            ->label('О системе — SEO Description')
+                            ->rows(2),
+
+                        TextInput::make("statistics_seo_title_{$locale}")
+                            ->label('Статистика — SEO Title')
+                            ->maxLength(255),
+
+                        Textarea::make("statistics_seo_description_{$locale}")
+                            ->label('Статистика — SEO Description')
+                            ->rows(2),
                     ]),
             ]);
     }
