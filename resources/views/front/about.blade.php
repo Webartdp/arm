@@ -78,7 +78,7 @@
     <meta name="referrer" content="origin-when-cross-origin">
     <meta name="robots" content="index,follow">
     <title>{{ $field('about_seo_title', $field('about_title', $d['about_title'])) }}</title>
-    <meta name="description" content="{{ $field('about_seo_description', $field('about_intro', $d['about_intro'])) }}">
+    <meta name="description" content="{{ $field('about_seo_description', strip_tags($field('about_intro', $d['about_intro']))) }}">
     @if($settings->favicon)<link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">@endif
     <link rel="stylesheet" href="/static/css/app.min.css?v=2">
     <style>
@@ -94,8 +94,12 @@
         .about-heading{margin:0;max-width:760px;font-size:25px;line-height:1.45;font-weight:500;text-transform:uppercase;color:#000}
         .about-copy{font-size:15.5px;line-height:1.55;color:#111}
         .about-copy p{margin:0 0 17px}
+        .about-copy h2,.about-copy h3{margin:20px 0 12px;font-weight:700;line-height:1.35}
+        .about-copy h2{font-size:21px}.about-copy h3{font-size:18px}
+        .about-copy a{color:#125c94;text-decoration:underline}
+        .about-copy blockquote{margin:18px 0;padding-left:16px;border-left:3px solid #d7d7d7}
         .about-list-title{font-weight:700}
-        .about-copy ul{margin:0;padding-left:25px}
+        .about-copy ul,.about-copy ol{margin:0 0 17px;padding-left:25px}
         .about-copy li{margin:2px 0}
         .about-verify{margin-top:86px}
         .about-verify .verify-card{margin-top:0}
@@ -151,7 +155,7 @@
             <h2 class="about-heading helvetica-55">{{ $field('about_title', $d['about_title']) }}</h2>
         </div>
         <div class="about-copy helvetica-55">
-            <p>{!! nl2br(e($field('about_intro', $d['about_intro']))) !!}</p>
+            {!! \Filament\Forms\Components\RichEditor\RichContentRenderer::make($field('about_intro', $d['about_intro']))->toHtml() !!}
             <p class="about-list-title">{{ $field('about_list_title', $d['about_list_title']) }}</p>
             @if($aboutItems)
                 <ul>
