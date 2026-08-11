@@ -134,6 +134,14 @@
         .verification-success .result-card--text{color:rgba(255,255,255,.92)}
         .verification-document-body{padding:8px 72px 38px}
         .verification-document-body .info-item:first-child{padding-top:12px}
+        .verification-source-details{padding:2px 0 6px}
+        .verification-source-section{margin:0;padding:22px 0 8px;border-bottom:1px solid #e7e9ec}
+        .verification-source-section:last-child{border-bottom:0}
+        .verification-source-section__title{margin:0 0 10px;font-family:Arial,sans-serif;font-size:19px;line-height:1.35;font-weight:700;color:#242a32;text-transform:none}
+        .verification-source-section__title--note{max-width:650px;font-size:15px;line-height:1.55;font-weight:600;color:#4b5563}
+        .verification-source-row{display:grid;grid-template-columns:minmax(190px,.9fr) minmax(220px,1.1fr);gap:24px;padding:8px 0;font-family:Arial,sans-serif;font-size:14px;line-height:1.45}
+        .verification-source-row>div{color:#7a838d}
+        .verification-source-row>strong{font-weight:600;color:#20252b;overflow-wrap:anywhere}
         .verification-download-wrap{text-align:center;margin-top:30px}
         .verification-download-link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 28px;border-radius:28px;background:linear-gradient(90deg,#125C94 0%,#18BBB4 100%);box-shadow:0 8px 20px rgba(18,92,148,.2);color:#fff!important;font-family:Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
         .verification-download-link:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(18,92,148,.26);color:#fff}
@@ -141,6 +149,8 @@
         @media(max-width:600px){
             .verification-document-body{padding:8px 22px 28px}
             .verification-success .result-pin{margin-left:8px;margin-right:8px}
+            .verification-source-row{grid-template-columns:1fr;gap:3px;padding:9px 0}
+            .verification-source-section__title{font-size:17px}
             .verification-download-link{width:100%;padding:0 18px}
         }
     </style>
@@ -227,20 +237,24 @@
                                 </div>
 
                                 <div class="verification-document-body">
-                                    @if($document->document_type)
-                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['type'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->document_type }}</div></div>
-                                    @endif
-                                    @if($document->title)
-                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['title'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->title }}</div></div>
-                                    @endif
-                                    @if($document->subject_name)
-                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['subject'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->subject_name }}</div></div>
-                                    @endif
-                                    @if($document->issue_date)
-                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['issued'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->issue_date->format('d/m/Y') }}</div></div>
-                                    @endif
-                                    @if($document->valid_until)
-                                        <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['valid_until'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->valid_until->format('d/m/Y') }}</div></div>
+                                    @if($document->document_kind === 'birth_certificate')
+                                        @include('front.partials.birth-certificate-details')
+                                    @else
+                                        @if($document->document_type)
+                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['type'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->document_type }}</div></div>
+                                        @endif
+                                        @if($document->title)
+                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['title'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->title }}</div></div>
+                                        @endif
+                                        @if($document->subject_name)
+                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['subject'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->subject_name }}</div></div>
+                                        @endif
+                                        @if($document->issue_date)
+                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['issued'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->issue_date->format('d/m/Y') }}</div></div>
+                                        @endif
+                                        @if($document->valid_until)
+                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['valid_until'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->valid_until->format('d/m/Y') }}</div></div>
+                                        @endif
                                     @endif
 
                                     @if($document->download_archive_path)
