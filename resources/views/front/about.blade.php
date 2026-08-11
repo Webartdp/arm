@@ -101,6 +101,71 @@
         .about-verify{margin-top:86px}
         .about-verify .verify-card{margin-top:0}
         @media(max-width:768px){.about-hero{height:155px}.about-hero__name{font-size:29px}.about-hero__title,.about-hero__subtitle{font-size:13px}.about-content{margin-top:42px}.about-heading-row{align-items:flex-start;gap:18px}.about-badge{width:74px;flex-basis:74px}.about-heading{font-size:19px}.about-copy{font-size:14px}}
+    
+        header{position:relative;z-index:50;background:#fff}
+        header .flex-container.align-middle.medium-align-justify.z-first.relative{
+            min-height:94px;
+            position:relative;
+            padding:0 30px;
+        }
+        .header-logo{
+            position:absolute;
+            left:50%;
+            bottom:-28px;
+            transform:translateX(-50%);
+            z-index:60;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            margin:0;
+        }
+        .header-logo--img{
+            width:108px;
+            height:108px;
+            border-radius:9999px;
+            background:#fff;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            overflow:hidden;
+            box-shadow:0 6px 16px rgba(0,0,0,.12);
+        }
+        .header-logo--img img{
+            display:block;
+            width:auto;
+            height:auto;
+            max-width:62px;
+            max-height:62px;
+        }
+        .header-logo--text{display:none!important}
+        .about-hero{margin-top:0}
+        .about-hero__inner{
+            position:relative;
+            z-index:1;
+            padding:58px 24px 14px;
+        }
+
+        @media(max-width:768px){
+            header .flex-container.align-middle.medium-align-justify.z-first.relative{
+                min-height:82px;
+                padding:0 16px;
+            }
+            .header-logo{
+                bottom:-24px;
+            }
+            .header-logo--img{
+                width:94px;
+                height:94px;
+            }
+            .header-logo--img img{
+                max-width:54px;
+                max-height:54px;
+            }
+            .about-hero__inner{
+                padding:54px 10px 10px;
+            }
+        }
+
     </style>
 </head>
 <body>
