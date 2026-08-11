@@ -71,15 +71,15 @@ class Document extends Model
 
     public function getEffectiveStatusAttribute(): string
     {
-        if ($this->status === 'revoked') {
-            return 'revoked';
+        if (in_array($this->status, ['draft', 'revoked', 'expired'], true)) {
+            return $this->status;
         }
 
-        if ($this->valid_until?->isPast()) {
+        if ($this->valid_until?->lt(today())) {
             return 'expired';
         }
 
-        return $this->status === 'draft' ? 'draft' : 'active';
+        return 'active';
     }
 
     public function creator(): BelongsTo
