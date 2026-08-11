@@ -85,7 +85,7 @@ class ManageSiteSettings extends Page
                                 ->preventFilePathTampering(),
 
                             FileUpload::make('about_image')
-                                ->label('Изображение страницы «О системе»')
+                                ->label('Иконка страницы «О системе»')
                                 ->image()
                                 ->disk('public')
                                 ->directory('site')
@@ -198,12 +198,16 @@ class ManageSiteSettings extends Page
                 Section::make('Страница «О системе»')
                     ->schema([
                         TextInput::make("about_title_{$locale}")
-                            ->label('Заголовок страницы')
+                            ->label('Большой заголовок рядом с иконкой')
                             ->maxLength(255),
 
                         Textarea::make("about_intro_{$locale}")
                             ->label('Основной текст')
                             ->rows(6),
+
+                        TextInput::make("about_list_title_{$locale}")
+                            ->label('Жирный заголовок перед списком')
+                            ->maxLength(500),
 
                         Repeater::make("about_items_{$locale}")
                             ->label('Список пунктов')
