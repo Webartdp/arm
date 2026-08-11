@@ -395,7 +395,7 @@
 
                 @if($settings->footer_email)
                     <div style="margin-top: 12px;">
-                        Email address
+                        {{ $locale === 'ru' ? 'Эл. почта' : ($locale === 'am' ? 'Էլ.Փոստ' : 'Email address') }}
                         <a href="mailto:{{ $settings->footer_email }}" class="color-inherit">
                             {{ $settings->footer_email }}
                         </a>
