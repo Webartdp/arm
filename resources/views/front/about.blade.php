@@ -84,7 +84,7 @@
     <style>
         .about-hero{height:176px;position:relative;background-image:url('/static/img/docs.jpg');background-position:center;background-size:cover;background-repeat:no-repeat;display:flex;align-items:center;justify-content:center;text-align:center;color:#fff;z-index:-1}
         .about-hero__inner{position:relative;z-index:1;padding:15px 24px}
-        .about-hero__name{margin:0 0 8px;font-size:40px;line-height:1.1;font-weight:900;letter-spacing:-1.5px;text-shadow:2px 2px 1px rgba(0,0,0,.65)}
+        .about-hero__name{margin:13px 0 8px;font-size:40px;line-height:1.1;font-weight:900;letter-spacing:-1.5px}
         .about-hero__title{font-size:16px;line-height:1.35;font-weight:700;margin-bottom:4px;text-shadow:1px 1px 1px rgba(0,0,0,.7)}
         .about-hero__subtitle{font-size:15px;line-height:1.35;font-weight:700;text-shadow:1px 1px 1px rgba(0,0,0,.7)}
         .about-content{max-width:950px;margin:67px auto 0;padding:0 20px}
