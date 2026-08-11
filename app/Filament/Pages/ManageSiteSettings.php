@@ -6,6 +6,7 @@ use App\Models\SiteSetting;
 use Filament\Actions\Action;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
@@ -201,9 +202,9 @@ class ManageSiteSettings extends Page
                             ->label('Большой заголовок рядом с иконкой')
                             ->maxLength(255),
 
-                        Textarea::make("about_intro_{$locale}")
+                        RichEditor::make("about_intro_{$locale}")
                             ->label('Основной текст')
-                            ->rows(6),
+                            ->columnSpanFull(),
 
                         TextInput::make("about_list_title_{$locale}")
                             ->label('Жирный заголовок перед списком')
