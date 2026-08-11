@@ -308,12 +308,11 @@
         ctx.restore();
     }
 
-    var labels2 = ['BY', 'MD', 'FA', 'UG', 'NT', 'EJ', 'EH', 'AP', copy.diplomas];
+    var labels2 = ['BY', 'MD', 'FA', 'UG', 'NT', 'EJ', 'Health certificates', 'Apostile', 'Diplomas and certificates'];
     var labelY = [489, 523, 558, 593, 628, 663, 697, 732, 766];
 
     for (var l = 0; l < labels2.length; l++) {
-        var isLast = l === labels2.length - 1;
-        text(labels2[l], 238, labelY[l], isLast ? '14px Arial, sans-serif' : '700 16px Arial, sans-serif', '#222', 'right', 'middle');
+        text(labels2[l], 238, labelY[l], '700 14px Arial, sans-serif', '#222', 'right', 'middle');
     }
 
     /* Static bar geometry copied from the reference chart. */
