@@ -80,32 +80,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0,user-scalable=0">
     <meta name="referrer" content="origin-when-cross-origin">
     <meta name="robots" content="index,follow">
-
     <title>{{ $field('statistics_seo_title', $d['statistics_title']) }}</title>
     <meta name="description" content="{{ $field('statistics_seo_description', $d['hero_subtitle']) }}">
-
     @if($settings->favicon)
         <link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">
     @endif
-
     <link rel="stylesheet" href="/static/css/app.min.css?v=2">
-
     <style>
-        .statistics-exact-wrap{
-            width:100%;
-            max-width:945px;
-            margin:40px auto 70px;
-            padding:0;
-            overflow:hidden;
-        }
-        .statistics-exact-canvas{
-            display:block;
-            width:100%;
-            height:auto;
-            background:#fff;
-        }
+        .statistics-exact-wrap{width:100%;max-width:945px;margin:40px auto 42px;padding:0;overflow:hidden}
+        .statistics-exact-canvas{display:block;width:100%;height:auto;background:#fff}
         @media(max-width:700px){
-            .statistics-exact-wrap{margin-top:28px;margin-bottom:45px;overflow-x:auto}
+            .statistics-exact-wrap{margin-top:28px;margin-bottom:34px;overflow-x:auto}
             .statistics-exact-canvas{width:945px;max-width:none}
         }
     </style>
@@ -114,7 +99,6 @@
 <header>
     <div class="flex-container align-middle medium-align-justify z-first relative">
         <div class="burger-btn popup-open hide-lg" data-id="burger-nav"><span></span><span></span><span></span></div>
-
         <div class="burger-nav popup-content" id="burger-nav">
             <div class="burger-nav-close popup-close hide-lg" data-id="burger-nav"><i class="icon icon-close medium"></i></div>
             <ul class="header-menu default pointed color-blue large-flex-container align-middle">
@@ -122,7 +106,6 @@
                 <li><a href="{{ route('front.statistics', ['locale' => $locale]) }}" class="nav-link helvetica-65">{{ $field('nav_statistics', $d['nav_statistics']) }}</a></li>
             </ul>
         </div>
-
         <div class="header-logo flex-container align-middle">
             <a href="{{ route('front.home', ['locale' => $locale]) }}" class="header-logo--img">
                 @if($settings->logo)
@@ -133,7 +116,6 @@
             </a>
             <a href="{{ route('front.home', ['locale' => $locale]) }}" class="header-logo--text font-spacing-rv-04 font-bold color-grey hide-md">{{ $field('site_name', $d['site_name']) }}</a>
         </div>
-
         <div class="lang relative color-grey-60">
             <div class="lang--selected has-drop cursor-pointer">
                 <div class="flex-container align-middle helvetica-65 font-uppercase font-spacing-01 color-inherit lang-item"><i class="icon icon-globe small"></i>{{ $locale }}</div>
@@ -165,6 +147,8 @@
     <div class="statistics-exact-wrap">
         <canvas id="statisticsExactCanvas" class="statistics-exact-canvas" width="945" height="845" aria-label="{{ $d['statistics_title'] }}"></canvas>
     </div>
+
+    @include('front.partials.statistics-countries')
 </main>
 
 <footer class="text-center">
@@ -192,7 +176,6 @@
 
     var ctx = canvas.getContext('2d');
     var copy = @json($chartCopy, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-
     var W = 945;
     var H = 845;
 
@@ -233,7 +216,6 @@
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, W, H);
 
-    /* FIRST CHART */
     text(copy.visits, 472.5, 20, '700 20px Arial, sans-serif', '#222', 'center');
 
     var left1 = 94;
@@ -253,7 +235,7 @@
     line(left1, bottom1, right1, bottom1, '#cfcfcf', 1);
 
     var points = [
-        {x:94,  y:277},
+        {x:94, y:277},
         {x:247, y:72},
         {x:400, y:102},
         {x:553, y:98},
@@ -292,7 +274,6 @@
     var monthX = [94, 247, 400, 553, 706, 859];
     for (var m = 0; m < months.length; m++) mixedMonthLabel(months[m], '2023', monthX[m], 385);
 
-    /* SECOND CHART */
     text(copy.documents, 472.5, 444, '700 20px Arial, sans-serif', '#222', 'center');
 
     var left2 = 247;
@@ -321,7 +302,6 @@
         text(labels2[l], 238, labelY[l], '700 14px Arial, sans-serif', '#222', 'right', 'middle');
     }
 
-    /* Static bar geometry copied from the reference chart. */
     ctx.fillStyle = 'rgba(188, 188, 188, 0.46)';
     var bars = [
         {x1:247, x2:253, y:646, h:17},
