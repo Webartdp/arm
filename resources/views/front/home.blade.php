@@ -64,11 +64,8 @@
             'code' => 'Verification code',
             'type' => 'Document type',
             'title' => 'Document',
-            'subject' => 'Holder / recipient',
             'issued' => 'Issue date',
             'valid_until' => 'Valid until',
-            'download' => 'Download document archive',
-            'download_hint' => 'The archive contains the file attached to this verified record.',
         ],
         'ru' => [
             'valid' => ['Документ действителен', 'Документ успешно прошёл проверку.'],
@@ -80,11 +77,8 @@
             'code' => 'Код проверки',
             'type' => 'Тип документа',
             'title' => 'Документ',
-            'subject' => 'Владелец / получатель',
             'issued' => 'Дата выдачи',
             'valid_until' => 'Действителен до',
-            'download' => 'Скачать архив с документом',
-            'download_hint' => 'Архив содержит файл, прикреплённый к этой проверенной записи.',
         ],
         'am' => [
             'valid' => ['Փաստաթուղթը վավեր է', 'Փաստաթուղթը հաջողությամբ անցել է ստուգումը։'],
@@ -96,11 +90,8 @@
             'code' => 'Ստուգման կոդ',
             'type' => 'Փաստաթղթի տեսակ',
             'title' => 'Փաստաթուղթ',
-            'subject' => 'Սեփականատեր / ստացող',
             'issued' => 'Տրման ամսաթիվ',
             'valid_until' => 'Վավեր է մինչև',
-            'download' => 'Ներբեռնել փաստաթղթի արխիվը',
-            'download_hint' => 'Արխիվը պարունակում է այս ստուգված գրառմանը կցված ֆայլը։',
         ],
     ];
 
@@ -123,37 +114,6 @@
     <meta name="description" content="{{ $field('seo_description', $d['hero_subtitle']) }}">
     @if($settings->favicon)<link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">@endif
     <link rel="stylesheet" href="/static/css/app.min.css?v=2">
-    <style>
-        .verification-success{padding-top:0;overflow:visible}
-        .verification-success .result-pin{position:relative;z-index:2;max-width:620px;margin-left:auto;margin-right:auto}
-        .verification-success .result-pin__code{font-size:16px;letter-spacing:.08em;color:#333}
-        .verification-success .result-card{position:relative;background:#18BBB4;color:#fff;border:0;box-shadow:none}
-        .verification-success .result-card:before{left:50%}
-        .verification-success .result-card--img{font-size:28px;top:4px}
-        .verification-success .result-card--title{color:#fff;margin-top:5px}
-        .verification-success .result-card--text{color:rgba(255,255,255,.92)}
-        .verification-document-body{padding:8px 72px 38px}
-        .verification-document-body .info-item:first-child{padding-top:12px}
-        .verification-source-details{padding:2px 0 6px}
-        .verification-source-section{margin:0;padding:22px 0 8px;border-bottom:1px solid #e7e9ec}
-        .verification-source-section:last-child{border-bottom:0}
-        .verification-source-section__title{margin:0 0 10px;font-family:Arial,sans-serif;font-size:19px;line-height:1.35;font-weight:700;color:#242a32;text-transform:none}
-        .verification-source-section__title--note{max-width:650px;font-size:15px;line-height:1.55;font-weight:600;color:#4b5563}
-        .verification-source-row{display:grid;grid-template-columns:minmax(190px,.9fr) minmax(220px,1.1fr);gap:24px;padding:8px 0;font-family:Arial,sans-serif;font-size:14px;line-height:1.45}
-        .verification-source-row>div{color:#7a838d}
-        .verification-source-row>strong{font-weight:600;color:#20252b;overflow-wrap:anywhere}
-        .verification-download-wrap{text-align:center;margin-top:30px}
-        .verification-download-link{display:inline-flex;align-items:center;justify-content:center;gap:10px;min-height:52px;padding:0 28px;border-radius:28px;background:linear-gradient(90deg,#125C94 0%,#18BBB4 100%);box-shadow:0 8px 20px rgba(18,92,148,.2);color:#fff!important;font-family:Arial,sans-serif;font-size:14px;font-weight:700;letter-spacing:.01em;text-decoration:none;transition:transform .18s ease,box-shadow .18s ease}
-        .verification-download-link:hover{transform:translateY(-1px);box-shadow:0 10px 24px rgba(18,92,148,.26);color:#fff}
-        .verification-download-hint{max-width:520px;margin:12px auto 0;text-align:center}
-        @media(max-width:600px){
-            .verification-document-body{padding:8px 22px 28px}
-            .verification-success .result-pin{margin-left:8px;margin-right:8px}
-            .verification-source-row{grid-template-columns:1fr;gap:3px;padding:9px 0}
-            .verification-source-section__title{font-size:17px}
-            .verification-download-link{width:100%;padding:0 18px}
-        }
-    </style>
 </head>
 <body>
 <header>
@@ -223,52 +183,7 @@
                     @endphp
 
                     @if($verificationResult === 'valid' && $document)
-                        <div class="response-card dynamic-view bg-white radius-12 shadow-primary verification-success">
-                            <div class="row align-center"><div class="column small-14 large-10 x-large-8">
-                                <div class="info-bar result-pin bg-grey-5 radius-8 text-center">
-                                    <div class="text-xsmall helvetica-65 color-grey-60">{{ $v['code'] }}</div>
-                                    <div class="helvetica-75 font-bold verification-success result-pin__code">{{ $document->tracking_number }}</div>
-                                </div>
-
-                                <div class="result-card relative radius-12 bg-success color-white text-center">
-                                    <div class="result-card--img"><i class="icon icon-check-filled large"></i></div>
-                                    <div class="result-card--title text-large helvetica-75 font-bold color-white">{{ $resultTitle }}</div>
-                                    <div class="text-small helvetica-55 result-card--text">{{ $resultText }}</div>
-                                </div>
-
-                                <div class="verification-document-body">
-                                    @if($document->document_kind === 'birth_certificate')
-                                        @include('front.partials.birth-certificate-details')
-                                    @else
-                                        @if($document->document_type)
-                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['type'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->document_type }}</div></div>
-                                        @endif
-                                        @if($document->title)
-                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['title'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->title }}</div></div>
-                                        @endif
-                                        @if($document->subject_name)
-                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['subject'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->subject_name }}</div></div>
-                                        @endif
-                                        @if($document->issue_date)
-                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['issued'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->issue_date->format('d/m/Y') }}</div></div>
-                                        @endif
-                                        @if($document->valid_until)
-                                            <div class="info-item"><div class="info-item--title text-xsmall helvetica-65 color-grey-60">{{ $v['valid_until'] }}</div><div class="text-small helvetica-55 color-grey">{{ $document->valid_until->format('d/m/Y') }}</div></div>
-                                        @endif
-                                    @endif
-
-                                    @if($document->download_archive_path)
-                                        <div class="verification-download-wrap">
-                                            <a class="verification-download-link" href="{{ route('front.document.download', ['locale' => $locale, 'trackingNumber' => $document->tracking_number]) }}">
-                                                <i class="icon icon-download medium"></i>
-                                                <span>{{ $v['download'] }}</span>
-                                            </a>
-                                            <div class="verification-download-hint text-xsmall helvetica-55 color-grey-60">{{ $v['download_hint'] }}</div>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div></div>
-                        </div>
+                        @include('front.partials.verified-document-result')
                     @else
                         <div class="response-card dynamic-view"><div class="row align-center"><div class="column small-14 large-10 x-large-8">
                             <div class="result-card radius-12 bg-white" style="border-top:4px solid {{ $resultBorder }};">
