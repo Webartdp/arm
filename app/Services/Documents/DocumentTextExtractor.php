@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use RuntimeException;
 use Symfony\Component\Process\Process;
+use Throwable;
 
 final class DocumentTextExtractor
 {
@@ -95,7 +96,7 @@ final class DocumentTextExtractor
         }
     }
 
-    private function extractImage(string $path): string
+    private function extractImage(string $path, int $minCharacters = 20): string
     {
         $languages = [
             'hye+rus+eng',
@@ -124,7 +125,7 @@ final class DocumentTextExtractor
             if ($process->isSuccessful()) {
                 $text = $this->normalize($process->getOutput());
 
-                if (mb_strlen(preg_replace('/\s+/u', '', $text) ?? '') >= 20) {
+                if (mb_strlen(preg_replace('/\s+/u', '', $text) ?? '') >= $minCharacters) {
                     return $text;
                 }
             }
@@ -139,22 +140,122 @@ final class DocumentTextExtractor
 
     private function extractDocx(string $path): string
     {
-        $process = new Process(['unzip', '-p', $path, 'word/document.xml']);
-        $process->setTimeout(60);
-        $process->mustRun();
+        $list = new Process(['unzip', '-Z1', $path]);
+        $list->setTimeout(60);
+        $list->mustRun();
 
-        $xml = $process->getOutput();
+        $members = array_values(array_filter(
+            preg_split('/\R/u', trim($list->getOutput())) ?: [],
+            static fn (string $member): bool => $member !== ''
+        ));
 
-        if ($xml === '') {
+        $xmlMembers = array_values(array_filter(
+            $members,
+            static fn (string $member): bool => (bool) preg_match(
+                '#^word/(?:document|header\d+|footer\d+|footnotes|endnotes|comments)\.xml$#i',
+                $member
+            )
+        ));
+
+        usort($xmlMembers, static function (string $a, string $b): int {
+            $priority = static function (string $member): int {
+                return match (true) {
+                    $member === 'word/document.xml' => 0,
+                    str_contains($member, '/header') => 1,
+                    str_contains($member, '/footer') => 2,
+                    default => 3,
+                };
+            };
+
+            return [$priority($a), $a] <=> [$priority($b), $b];
+        });
+
+        if (! in_array('word/document.xml', $xmlMembers, true)) {
             throw new RuntimeException('DOCX не содержит word/document.xml.');
         }
 
+        $chunks = [];
+
+        foreach ($xmlMembers as $member) {
+            $process = new Process(['unzip', '-p', $path, $member]);
+            $process->setTimeout(60);
+            $process->run();
+
+            if (! $process->isSuccessful() || $process->getOutput() === '') {
+                continue;
+            }
+
+            $text = $this->docxXmlToText($process->getOutput());
+
+            if ($this->nonSpaceLength($text) >= 2) {
+                $chunks[] = $text;
+            }
+        }
+
+        $mediaMembers = array_slice(array_values(array_filter(
+            $members,
+            static fn (string $member): bool => (bool) preg_match(
+                '#^word/media/.+\.(?:png|jpe?g|webp|tif|tiff|bmp)$#i',
+                $member
+            )
+        )), 0, 20);
+
+        if ($mediaMembers !== []) {
+            $tmpDir = storage_path('app/tmp/document-docx-media-' . Str::uuid());
+            File::ensureDirectoryExists($tmpDir);
+
+            try {
+                foreach ($mediaMembers as $index => $member) {
+                    $extension = strtolower(pathinfo($member, PATHINFO_EXTENSION));
+                    $target = $tmpDir . '/' . $index . '.' . $extension;
+
+                    $process = new Process(['unzip', '-p', $path, $member]);
+                    $process->setTimeout(60);
+                    $process->run();
+
+                    if (! $process->isSuccessful() || $process->getOutput() === '') {
+                        continue;
+                    }
+
+                    File::put($target, $process->getOutput());
+
+                    try {
+                        $mediaText = $this->extractImage($target, 4);
+
+                        if ($this->nonSpaceLength($mediaText) >= 4) {
+                            $chunks[] = $mediaText;
+                        }
+                    } catch (Throwable) {
+                        // Decorative images and logos are allowed to contain no readable text.
+                    }
+                }
+            } finally {
+                File::deleteDirectory($tmpDir);
+            }
+        }
+
+        $text = $this->normalize(implode("\n\n", $chunks));
+
+        if ($this->nonSpaceLength($text) < 20) {
+            throw new RuntimeException('Не удалось получить достаточно текста из DOCX.');
+        }
+
+        return $text;
+    }
+
+    private function docxXmlToText(string $xml): string
+    {
         $xml = preg_replace('/<w:tab[^>]*\/>/u', "\t", $xml) ?? $xml;
         $xml = preg_replace('/<w:br[^>]*\/>/u', "\n", $xml) ?? $xml;
         $xml = preg_replace('/<\/w:p>/u', "\n", $xml) ?? $xml;
         $text = strip_tags($xml);
 
         return html_entity_decode($text, ENT_QUOTES | ENT_XML1, 'UTF-8');
+    }
+
+    private function nonSpaceLength(string $text): int
+    {
+        return mb_strlen(preg_replace('/\s+/u', '', $text) ?? '');
     }
 
     private function normalize(string $text): string
