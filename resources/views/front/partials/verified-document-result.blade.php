@@ -196,13 +196,7 @@
      * The original site switches Helvetica utility classes to
      * HelveticaNeueCyr for the RU locale.
      */
-    html[lang="ru"] .source-result-title{
-        font-family:HelveticaNeueCyr,Arial,sans-serif!important;
-        font-weight:400!important;
-        font-style:normal!important;
-    }
-
-    html[lang="ru"] .source-result-reset,
+html[lang="ru"] .source-result-reset,
     html[lang="ru"] .source-result-status,
     html[lang="ru"] .source-result-details{
         font-family:HelveticaNeueCyr,Arial,sans-serif!important;
