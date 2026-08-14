@@ -9,41 +9,78 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::table('site_settings', function (Blueprint $table): void {
-            foreach (['ru', 'en', 'am'] as $locale) {
-                $table->string("verified_service_name_{$locale}")->nullable();
-                $table->string("verified_country_{$locale}")->nullable();
-                $table->string("verified_subtitle_{$locale}", 500)->nullable();
-            }
-        });
+        $columns = [
+            'verified_service_name_ru' => 255,
+            'verified_country_ru' => 255,
+            'verified_subtitle_ru' => 500,
+            'verified_service_name_en' => 255,
+            'verified_country_en' => 255,
+            'verified_subtitle_en' => 500,
+            'verified_service_name_am' => 255,
+            'verified_country_am' => 255,
+            'verified_subtitle_am' => 500,
+        ];
 
-        DB::table('site_settings')->where('id', 1)->update([
-            'verified_service_name_ru' => 'arm.gov.e-verify.net',
-            'verified_country_ru' => 'Республика Армения',
-            'verified_subtitle_ru' => 'единая система проверки действительности официальных документов',
-            'verified_service_name_en' => 'arm.gov.e-verify.net',
-            'verified_country_en' => 'Republic of Armenia',
-            'verified_subtitle_en' => 'unified system for checking the validity of official documents',
-            'verified_service_name_am' => 'arm.gov.e-verify.net',
-            'verified_country_am' => 'Հայաստանի Հանրապետություն',
-            'verified_subtitle_am' => 'պաշտոնական փաստաթղթերի վավերականության ստուգման միասնական համակարգ',
-        ]);
+        foreach ($columns as $name => $length) {
+            if (Schema::hasColumn('site_settings', $name)) {
+                continue;
+            }
+
+            Schema::table('site_settings', function (Blueprint $table) use ($name, $length): void {
+                $table->string($name, $length)->nullable();
+            });
+        }
+
+        if (DB::table('site_settings')->where('id', 1)->exists()) {
+            $defaults = [
+                'verified_service_name_ru' => 'arm.gov.e-verify.net',
+                'verified_country_ru' => 'Республика Армения',
+                'verified_subtitle_ru' => 'единая система проверки действительности официальных документов',
+                'verified_service_name_en' => 'arm.gov.e-verify.net',
+                'verified_country_en' => 'Republic of Armenia',
+                'verified_subtitle_en' => 'unified system for checking the validity of official documents',
+                'verified_service_name_am' => 'arm.gov.e-verify.net',
+                'verified_country_am' => 'Հայաստանի Հանրապետություն',
+                'verified_subtitle_am' => 'պաշտոնական փաստաթղթերի վավերականության ստուգման միասնական համակարգ',
+            ];
+
+            $record = DB::table('site_settings')->where('id', 1)->first();
+            $updates = [];
+
+            foreach ($defaults as $column => $value) {
+                if (blank($record->{$column} ?? null)) {
+                    $updates[$column] = $value;
+                }
+            }
+
+            if ($updates !== []) {
+                DB::table('site_settings')->where('id', 1)->update($updates);
+            }
+        }
     }
 
     public function down(): void
     {
-        Schema::table('site_settings', function (Blueprint $table): void {
-            $table->dropColumn([
-                'verified_service_name_ru',
-                'verified_country_ru',
-                'verified_subtitle_ru',
-                'verified_service_name_en',
-                'verified_country_en',
-                'verified_subtitle_en',
-                'verified_service_name_am',
-                'verified_country_am',
-                'verified_subtitle_am',
-            ]);
-        });
+        $columns = [
+            'verified_service_name_ru',
+            'verified_country_ru',
+            'verified_subtitle_ru',
+            'verified_service_name_en',
+            'verified_country_en',
+            'verified_subtitle_en',
+            'verified_service_name_am',
+            'verified_country_am',
+            'verified_subtitle_am',
+        ];
+
+        foreach ($columns as $name) {
+            if (! Schema::hasColumn('site_settings', $name)) {
+                continue;
+            }
+
+            Schema::table('site_settings', function (Blueprint $table) use ($name): void {
+                $table->dropColumn($name);
+            });
+        }
     }
 };
