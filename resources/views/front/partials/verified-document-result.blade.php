@@ -144,7 +144,7 @@
     .source-result-reset__x:before{transform:rotate(45deg)}
     .source-result-reset__x:after{transform:rotate(-45deg)}
 
-    .source-result-title{position:relative;margin:58px 32px 48px;color:#333;font-family:'GHEA Narek','Times New Roman',Times,serif;font-size:35px;line-height:1.05;font-weight:400;text-align:center;text-transform:uppercase}
+    .source-result-title{position:relative;margin:58px 32px 48px;color:#333;font-family:'GHEA Narek',Arial,sans-serif;font-size:35px;line-height:1.05;font-weight:400;text-align:center;text-transform:uppercase}
 
     .source-result-success{position:relative;width:min(912px,calc(100% - 64px));height:198px;margin:0 auto;background:#18bbb4;border-radius:12px;color:#fff}
     .source-result-success:before{content:'';position:absolute;top:-18px;left:50%;transform:translateX(-50%);width:80px;height:80px;background:#18bbb4;border-radius:50%}
@@ -169,12 +169,27 @@
     .source-result-row--empty>strong{min-height:1em}
     .source-result-empty{padding:18px 0;color:#adadad;font-size:13px;text-align:center}
 
-    html[lang="ru"] .source-result-title,
+    /*
+     * Russian source typography.
+     * The original site switches Helvetica utility classes to
+     * HelveticaNeueCyr for the RU locale.
+     */
+    html[lang="ru"] .source-result-title{
+        font-family:HelveticaNeueCyr,Arial,sans-serif!important;
+        font-weight:400!important;
+        font-style:normal!important;
+    }
+
     html[lang="ru"] .source-result-reset,
     html[lang="ru"] .source-result-status,
-    html[lang="ru"] .source-result-download,
     html[lang="ru"] .source-result-details{
-        font-family:'Times New Roman',Times,serif!important;
+        font-family:HelveticaNeueCyr,Arial,sans-serif!important;
+        font-weight:400!important;
+    }
+
+    html[lang="ru"] .source-result-download{
+        font-family:HelveticaNeueCyr,Arial,sans-serif!important;
+        font-weight:700!important;
     }
 
     @media(max-width:760px){
