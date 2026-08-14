@@ -119,8 +119,6 @@
     .source-result-empty{padding:18px 0;color:#adadad;font-size:13px;text-align:center}
 
     @media(max-width:760px){
-        body:has(.verified-source-result-marker){background:#283e42!important}
-
         .source-result-shell{
             width:calc(100vw - 36px);
             margin:0 auto;
