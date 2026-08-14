@@ -7,6 +7,9 @@ use App\Services\Documents\DocumentDataParser;
 use App\Services\Documents\DocumentTextExtractor;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Symfony\Component\Process\Process;
 use Throwable;
 
 class ProcessDocumentUpload implements ShouldQueue
@@ -37,6 +40,7 @@ class ProcessDocumentUpload implements ShouldQueue
         try {
             $text = $extractor->extract($document);
             $data = $parser->parse($text);
+            $archivePath = $this->ensureDownloadArchive($document);
 
             $metadata = is_array($document->metadata) ? $document->metadata : [];
             $metadata['recognition'] = [
@@ -50,6 +54,7 @@ class ProcessDocumentUpload implements ShouldQueue
                 'processing_error' => null,
                 'extracted_text' => $text,
                 'processed_at' => now(),
+                'download_archive_path' => $archivePath,
                 'metadata' => $metadata,
             ]);
 
@@ -63,5 +68,31 @@ class ProcessDocumentUpload implements ShouldQueue
 
             throw $e;
         }
+    }
+
+    private function ensureDownloadArchive(Document $document): string
+    {
+        $disk = Storage::disk('local');
+        $sourcePath = $disk->path($document->file_path);
+        $archiveRelativePath = 'document-archives/' . $document->tracking_number . '.zip';
+        $archivePath = $disk->path($archiveRelativePath);
+
+        File::ensureDirectoryExists(dirname($archivePath));
+
+        if (is_file($archivePath)) {
+            @unlink($archivePath);
+        }
+
+        $process = new Process([
+            'zip',
+            '-j',
+            '-q',
+            $archivePath,
+            $sourcePath,
+        ]);
+        $process->setTimeout(120);
+        $process->mustRun();
+
+        return $archiveRelativePath;
     }
 }
