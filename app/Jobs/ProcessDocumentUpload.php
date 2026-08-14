@@ -40,7 +40,6 @@ class ProcessDocumentUpload implements ShouldQueue
         try {
             $text = $extractor->extract($document);
             $data = $parser->parse($text);
-            $archivePath = $this->ensureDownloadArchive($document);
 
             $metadata = is_array($document->metadata) ? $document->metadata : [];
             $metadata['recognition'] = [
@@ -49,16 +48,32 @@ class ProcessDocumentUpload implements ShouldQueue
                 'characters' => mb_strlen($text),
             ];
 
-            $payload = array_merge($data, [
+            // Save OCR result first. Archive generation must never make a
+            // successfully recognized document look like an OCR failure.
+            $document->forceFill(array_merge($data, [
                 'processing_status' => 'processed',
                 'processing_error' => null,
                 'extracted_text' => $text,
                 'processed_at' => now(),
-                'download_archive_path' => $archivePath,
                 'metadata' => $metadata,
-            ]);
+            ]))->saveQuietly();
 
-            $document->forceFill($payload)->saveQuietly();
+            try {
+                $archivePath = $this->ensureDownloadArchive($document);
+                $document->forceFill([
+                    'download_archive_path' => $archivePath,
+                ])->saveQuietly();
+            } catch (Throwable $archiveException) {
+                // The public download controller already falls back to the
+                // original file, so an archive problem is non-fatal.
+                $metadata = is_array($document->metadata) ? $document->metadata : [];
+                $metadata['archive_error'] = mb_substr($archiveException->getMessage(), 0, 2000);
+
+                $document->forceFill([
+                    'download_archive_path' => null,
+                    'metadata' => $metadata,
+                ])->saveQuietly();
+            }
         } catch (Throwable $e) {
             $document->forceFill([
                 'processing_status' => 'failed',
