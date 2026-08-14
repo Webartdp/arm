@@ -139,6 +139,7 @@
     <meta name="description" content="{{ $field('seo_description', $d['hero_subtitle']) }}">
     @if($settings->favicon)<link rel="shortcut icon" href="{{ asset('storage/' . $settings->favicon) }}">@endif
     <link rel="stylesheet" href="/static/css/app.min.css?v=2">
+    <style>@media(min-width:761px){.source-result-title{font-size:2.25rem!important}}</style>
 </head>
 <body>
 <header>
