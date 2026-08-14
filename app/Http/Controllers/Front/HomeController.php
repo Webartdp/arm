@@ -6,9 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Document;
 use App\Models\SiteSetting;
 use App\Models\VerificationLog;
-use Carbon\CarbonImmutable;
 use Illuminate\Http\Request;
-use Throwable;
 
 class HomeController extends Controller
 {
@@ -50,14 +48,17 @@ class HomeController extends Controller
             ? implode('-', str_split(substr($rawTrackingNumber, 0, 16), 4))
             : '';
 
+        // `date` is kept only because the existing web component submits it
+        // and its presence marks an explicit Verify button click. The date
+        // itself is no longer part of document validation: verification is
+        // intentionally performed by the 16-character tracking code only.
         $date = trim((string) $request->query('date', ''));
         $document = null;
         $verificationResult = null;
 
         // QR links contain only `tnum`, so opening a QR just pre-fills the form.
-        // The existing form always submits the hidden `date` field (even when
-        // it is empty), therefore presence of `date` is our explicit submit
-        // marker and verification only starts after the user presses Verify.
+        // The form submits the hidden `date` field (even when empty), therefore
+        // presence of `date` means the user explicitly pressed Verify.
         $verificationRequested = $request->has('date');
 
         if (
@@ -82,21 +83,6 @@ class HomeController extends Controller
                         'draft' => 'draft',
                         default => 'invalid',
                     };
-
-                    if (
-                        $verificationResult === 'valid'
-                        && $date !== ''
-                        && $document->issue_date
-                    ) {
-                        $submittedDate = $this->parseIssueDate($date);
-
-                        if (
-                            ! $submittedDate
-                            || ! $document->issue_date->isSameDay($submittedDate)
-                        ) {
-                            $verificationResult = 'date_mismatch';
-                        }
-                    }
                 }
             }
 
@@ -126,26 +112,5 @@ class HomeController extends Controller
             'document',
             'verificationResult',
         ));
-    }
-
-    private function parseIssueDate(string $value): ?CarbonImmutable
-    {
-        foreach (['d/m/Y', 'Y-m-d', 'm/d/Y'] as $format) {
-            try {
-                $date = CarbonImmutable::createFromFormat('!' . $format, $value);
-
-                if ($date !== false) {
-                    return $date;
-                }
-            } catch (Throwable) {
-                // Try the next known format.
-            }
-        }
-
-        try {
-            return CarbonImmutable::parse($value)->startOfDay();
-        } catch (Throwable) {
-            return null;
-        }
     }
 }
