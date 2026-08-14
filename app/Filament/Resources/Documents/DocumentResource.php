@@ -17,6 +17,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\View;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -62,13 +63,40 @@ class DocumentResource extends Resource
     {
         return $schema
             ->components([
-                Section::make('Основные данные')
+                Section::make('Загрузить документ')
+                    ->description('Основной сценарий: загрузите PDF, изображение или DOCX и сохраните запись. Код проверки, распознавание данных и QR создаются автоматически.')
+                    ->schema([
+                        FileUpload::make('file_path')
+                            ->label('Оригинал документа')
+                            ->disk('local')
+                            ->directory('documents')
+                            ->visibility('private')
+                            ->acceptedFileTypes([
+                                'application/pdf',
+                                'image/jpeg',
+                                'image/png',
+                                'image/webp',
+                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                            ])
+                            ->maxSize(20480)
+                            ->previewable(false)
+                            ->downloadable()
+                            ->preventFilePathTampering()
+                            ->helperText('PDF/JPG/PNG/WEBP/DOCX, до 20 МБ. После сохранения файл автоматически отправляется на распознавание.'),
+
+                        View::make('filament.documents.automation-status'),
+                    ]),
+
+                Section::make('Распознанные основные данные')
+                    ->description('Система заполняет эти поля автоматически. Открывайте этот блок только если нужно что-то проверить или исправить руками.')
                     ->columns(2)
+                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         TextInput::make('tracking_number')
                             ->label('Код проверки')
                             ->placeholder('XXXX-XXXX-XXXX-XXXX')
-                            ->helperText('Можно оставить пустым — уникальный код будет создан автоматически.')
+                            ->helperText('Если оставить пустым, уникальный код создаётся автоматически при сохранении.')
                             ->maxLength(19)
                             ->unique(ignoreRecord: true)
                             ->rules([
@@ -96,7 +124,8 @@ class DocumentResource extends Resource
                             ])
                             ->default('generic')
                             ->required()
-                            ->native(false),
+                            ->native(false)
+                            ->helperText('Определяется автоматически при распознавании.'),
 
                         TextInput::make('document_type')
                             ->label('Тип документа')
@@ -120,7 +149,10 @@ class DocumentResource extends Resource
                     ]),
 
                 Section::make('Свидетельство о рождении — данные гражданина')
+                    ->description('Заполняется OCR автоматически для свидетельств о рождении.')
                     ->columns(2)
+                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         TextInput::make('citizen_first_name')
                             ->label('Имя')
@@ -147,6 +179,8 @@ class DocumentResource extends Resource
 
                 Section::make('Свидетельство о рождении — родители')
                     ->columns(2)
+                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         TextInput::make('father_first_name')
                             ->label('Отец — имя')
@@ -176,6 +210,8 @@ class DocumentResource extends Resource
 
                 Section::make('Свидетельство о рождении — регистрационные данные')
                     ->columns(2)
+                    ->collapsible()
+                    ->collapsed()
                     ->schema([
                         DatePicker::make('registration_date')
                             ->label('Дата регистрации'),
@@ -191,28 +227,13 @@ class DocumentResource extends Resource
                             ->maxLength(255),
                     ]),
 
-                Section::make('Файл и служебная информация')
+                Section::make('Служебная информация')
+                    ->description('Необязательные поля. Для обычной работы их заполнять не нужно.')
+                    ->collapsible()
+                    ->collapsed()
                     ->schema([
-                        FileUpload::make('file_path')
-                            ->label('Оригинал документа')
-                            ->disk('local')
-                            ->directory('documents')
-                            ->visibility('private')
-                            ->acceptedFileTypes([
-                                'application/pdf',
-                                'image/jpeg',
-                                'image/png',
-                                'image/webp',
-                                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                            ])
-                            ->maxSize(20480)
-                            ->previewable(false)
-                            ->downloadable()
-                            ->preventFilePathTampering()
-                            ->helperText('PDF/JPG/PNG/WEBP/DOCX, до 20 МБ. Файл хранится в приватном storage.'),
-
                         FileUpload::make('download_archive_path')
-                            ->label('ZIP-архив для публичного скачивания')
+                            ->label('Отдельный ZIP для публичного скачивания — необязательно')
                             ->disk('local')
                             ->directory('document-archives')
                             ->visibility('private')
@@ -224,12 +245,18 @@ class DocumentResource extends Resource
                             ->previewable(false)
                             ->downloadable()
                             ->preventFilePathTampering()
-                            ->helperText('Этот ZIP появится кнопкой скачивания только после успешной проверки активного документа. До 50 МБ.'),
+                            ->helperText('Если ZIP не загружен, кнопка DOWNLOAD DOCUMENT скачает исходный PDF/JPG/PNG/WEBP/DOCX.'),
 
                         Textarea::make('notes')
                             ->label('Внутренняя заметка')
                             ->rows(5)
                             ->helperText('Не отображается на публичной странице.'),
+
+                        Textarea::make('extracted_text')
+                            ->label('Распознанный исходный текст')
+                            ->rows(12)
+                            ->disabled()
+                            ->dehydrated(false),
                     ]),
             ]);
     }
@@ -243,6 +270,23 @@ class DocumentResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->copyable(),
+
+                TextColumn::make('processing_status')
+                    ->label('Распознавание')
+                    ->badge()
+                    ->formatStateUsing(fn (?string $state): string => match ($state) {
+                        'queued' => 'В очереди',
+                        'processing' => 'Распознаётся',
+                        'processed' => 'Готово',
+                        'failed' => 'Ошибка',
+                        default => 'Не запускалось',
+                    })
+                    ->color(fn (?string $state): string => match ($state) {
+                        'processed' => 'success',
+                        'processing', 'queued' => 'info',
+                        'failed' => 'danger',
+                        default => 'gray',
+                    }),
 
                 TextColumn::make('document_kind')
                     ->label('Шаблон')
@@ -283,12 +327,6 @@ class DocumentResource extends Resource
                     ->label('Выдан')
                     ->date('d.m.Y')
                     ->sortable(),
-
-                TextColumn::make('valid_until')
-                    ->label('До')
-                    ->date('d.m.Y')
-                    ->sortable()
-                    ->toggleable(),
 
                 TextColumn::make('created_at')
                     ->label('Создан')
