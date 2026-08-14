@@ -161,7 +161,7 @@
 <main>
     @if($verificationResult === 'valid' && $document)
         <div class="verified-source-brand color-grey hide-sm show-md text-center" style="margin-top:36px;">
-            <div style="font-family:'Montserratarm',Arial,sans-serif;font-size:38px;line-height:1.12;font-weight:700;letter-spacing:-1.4px;">arm.gov.e-verify.net</div>
+            <h1 style="font-size:38px;line-height:1.12;font-weight:800;letter-spacing:-1.4px;">arm.gov.e-verify.net</h1>
             <div class="helvetica-55" style="margin-top:8px;font-size:14px;line-height:1.35;">{{ $verifiedBrand['country'] }}</div>
             <div class="helvetica-55" style="margin-top:2px;font-size:13px;line-height:1.35;">{{ $verifiedBrand['subtitle'] }}</div>
         </div>
