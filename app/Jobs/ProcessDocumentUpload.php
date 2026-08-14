@@ -5,16 +5,13 @@ namespace App\Jobs;
 use App\Models\Document;
 use App\Services\Documents\DocumentDataParser;
 use App\Services\Documents\DocumentTextExtractor;
-use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable as FoundationQueueable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
+use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
 class ProcessDocumentUpload implements ShouldQueue
 {
-    use FoundationQueueable, InteractsWithQueue, Queueable, SerializesModels;
+    use Queueable;
 
     public int $tries = 2;
 
