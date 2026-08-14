@@ -33,53 +33,54 @@
     if ($document->document_kind === 'birth_certificate') {
         $documentTitle = $birthTitles[$locale] ?? $birthTitles['en'];
 
-        if ($sections === []) {
-            $sections = array_values(array_filter([
-                [
-                    'title' => $locale === 'am' ? 'Քաղաքացի' : ($locale === 'ru' ? 'Гражданин' : 'Citizen'),
-                    'fields' => array_values(array_filter([
-                        ['label' => $locale === 'am' ? 'անունը' : ($locale === 'ru' ? 'имя' : 'first name'), 'value' => $document->citizen_first_name],
-                        ['label' => $locale === 'am' ? 'հայրանունը' : ($locale === 'ru' ? 'отчество' : 'patronymic'), 'value' => $document->citizen_patronymic],
-                        ['label' => $locale === 'am' ? 'ազգանունը' : ($locale === 'ru' ? 'фамилия' : 'last name'), 'value' => $document->citizen_last_name],
-                        ['label' => $locale === 'am' ? 'ազգությունը' : ($locale === 'ru' ? 'национальность' : 'nationality'), 'value' => $document->citizen_nationality],
-                        ['label' => $locale === 'am' ? 'քաղաքացիությունը' : ($locale === 'ru' ? 'гражданство' : 'citizenship'), 'value' => $document->citizen_citizenship],
-                    ], fn ($f) => filled($f['value'] ?? null))),
+        // Birth certificates have a known source layout. Build these sections
+        // from normalized fields so the renderer can reproduce the original
+        // document structure consistently on desktop and mobile.
+        $sections = array_values(array_filter([
+            [
+                'title' => $locale === 'am' ? 'Քաղաքացի' : ($locale === 'ru' ? 'Гражданин' : 'Citizen'),
+                'fields' => [
+                    ['label' => $locale === 'am' ? 'անունը' : ($locale === 'ru' ? 'имя' : 'first name'), 'value' => $document->citizen_first_name],
+                    ['label' => $locale === 'am' ? 'հայրանունը' : ($locale === 'ru' ? 'отчество' : 'patronymic'), 'value' => $document->citizen_patronymic],
+                    ['label' => $locale === 'am' ? 'ազգանունը' : ($locale === 'ru' ? 'фамилия' : 'last name'), 'value' => $document->citizen_last_name],
+                    ['label' => $locale === 'am' ? 'ազգությունը' : ($locale === 'ru' ? 'национальность' : 'nationality'), 'value' => $document->citizen_nationality],
+                    ['label' => $locale === 'am' ? 'քաղաքացիությունը' : ($locale === 'ru' ? 'гражданство' : 'citizenship'), 'value' => $document->citizen_citizenship, 'show_empty' => true],
                 ],
-                [
-                    'title' => $locale === 'am' ? 'Ծնվել է' : ($locale === 'ru' ? 'родился / родилась' : 'was born'),
-                    'fields' => array_values(array_filter([
-                        ['label' => $locale === 'am' ? 'ծննդյան ամսաթիվը' : ($locale === 'ru' ? 'дата рождения' : 'birth date (year-month-day)'), 'value' => $document->birth_date?->format('Y-m-d')],
-                        ['label' => $locale === 'am' ? 'ծննդյան վայրը' : ($locale === 'ru' ? 'место рождения' : 'place of birth (country, region, residence)'), 'value' => $document->birth_place],
-                    ], fn ($f) => filled($f['value'] ?? null))),
-                ],
-                [
-                    'title' => $locale === 'am' ? 'Հայրը' : ($locale === 'ru' ? 'отец' : 'father'),
-                    'fields' => array_values(array_filter([
-                        ['label' => $locale === 'am' ? 'անունը' : ($locale === 'ru' ? 'имя' : 'first name'), 'value' => $document->father_first_name],
-                        ['label' => $locale === 'am' ? 'հայրանունը' : ($locale === 'ru' ? 'отчество' : 'patronymic'), 'value' => $document->father_patronymic],
-                        ['label' => $locale === 'am' ? 'ազգանունը' : ($locale === 'ru' ? 'фамилия' : 'last name'), 'value' => $document->father_last_name],
-                        ['label' => $locale === 'am' ? 'ազգությունը' : ($locale === 'ru' ? 'национальность' : 'nationality'), 'value' => $document->father_nationality],
-                    ], fn ($f) => filled($f['value'] ?? null))),
-                ],
-                [
-                    'title' => $locale === 'am' ? 'Մայրը' : ($locale === 'ru' ? 'мать' : 'mother'),
-                    'fields' => array_values(array_filter([
-                        ['label' => $locale === 'am' ? 'անունը' : ($locale === 'ru' ? 'имя' : 'first name'), 'value' => $document->mother_first_name],
-                        ['label' => $locale === 'am' ? 'հայրանունը' : ($locale === 'ru' ? 'отчество' : 'patronymic'), 'value' => $document->mother_patronymic],
-                        ['label' => $locale === 'am' ? 'ազգանունը' : ($locale === 'ru' ? 'фамилия' : 'last name'), 'value' => $document->mother_last_name],
-                        ['label' => $locale === 'am' ? 'ազգությունը' : ($locale === 'ru' ? 'национальность' : 'nationality'), 'value' => $document->mother_nationality],
-                    ], fn ($f) => filled($f['value'] ?? null))),
-                ],
-                [
-                    'title' => $locale === 'am' ? 'Գրանցում' : ($locale === 'ru' ? 'Регистрация' : 'Registration'),
-                    'fields' => array_values(array_filter([
-                        ['label' => $locale === 'am' ? 'գրանցման ամսաթիվը' : ($locale === 'ru' ? 'дата регистрации' : 'registration date (year-month-day)'), 'value' => $document->registration_date?->format('Y-m-d')],
-                        ['label' => $locale === 'am' ? 'գրանցման համարը' : ($locale === 'ru' ? 'номер регистрации' : 'registration number'), 'value' => $document->registration_number],
-                        ['label' => $locale === 'am' ? 'գրանցման մարմինը' : ($locale === 'ru' ? 'орган регистрации' : 'registration authority'), 'value' => $document->registration_authority],
-                    ], fn ($f) => filled($f['value'] ?? null))),
-                ],
-            ], fn ($section) => !empty($section['fields'])));
-        }
+            ],
+            [
+                'title' => $locale === 'am' ? 'Ծնվել է' : ($locale === 'ru' ? 'родился / родилась' : 'was born'),
+                'fields' => array_values(array_filter([
+                    ['label' => $locale === 'am' ? 'ծննդյան ամսաթիվը' : ($locale === 'ru' ? 'дата рождения' : 'birth date (year-month-day)'), 'value' => $document->birth_date?->format('Y-m-d')],
+                    ['label' => $locale === 'am' ? 'ծննդյան վայրը' : ($locale === 'ru' ? 'место рождения' : 'place of birth (country, region, residence)'), 'value' => $document->birth_place],
+                ], fn ($f) => filled($f['value'] ?? null))),
+            ],
+            [
+                'title' => $locale === 'am' ? 'Հայրը' : ($locale === 'ru' ? 'отец' : 'father'),
+                'fields' => array_values(array_filter([
+                    ['label' => $locale === 'am' ? 'անունը' : ($locale === 'ru' ? 'имя' : 'first name'), 'value' => $document->father_first_name],
+                    ['label' => $locale === 'am' ? 'հայրանունը' : ($locale === 'ru' ? 'отчество' : 'patronymic'), 'value' => $document->father_patronymic],
+                    ['label' => $locale === 'am' ? 'ազգանունը' : ($locale === 'ru' ? 'фамилия' : 'last name'), 'value' => $document->father_last_name],
+                    ['label' => $locale === 'am' ? 'ազգությունը' : ($locale === 'ru' ? 'национальность' : 'nationality'), 'value' => $document->father_nationality],
+                ], fn ($f) => filled($f['value'] ?? null))),
+            ],
+            [
+                'title' => $locale === 'am' ? 'Մայրը' : ($locale === 'ru' ? 'мать' : 'mother'),
+                'fields' => array_values(array_filter([
+                    ['label' => $locale === 'am' ? 'անունը' : ($locale === 'ru' ? 'имя' : 'first name'), 'value' => $document->mother_first_name],
+                    ['label' => $locale === 'am' ? 'հայրանունը' : ($locale === 'ru' ? 'отчество' : 'patronymic'), 'value' => $document->mother_patronymic],
+                    ['label' => $locale === 'am' ? 'ազգանունը' : ($locale === 'ru' ? 'фамилия' : 'last name'), 'value' => $document->mother_last_name],
+                    ['label' => $locale === 'am' ? 'ազգությունը' : ($locale === 'ru' ? 'национальность' : 'nationality'), 'value' => $document->mother_nationality],
+                ], fn ($f) => filled($f['value'] ?? null))),
+            ],
+            [
+                'title' => $locale === 'am' ? 'Գրանցում' : ($locale === 'ru' ? 'Регистрация' : 'Registration'),
+                'fields' => array_values(array_filter([
+                    ['label' => $locale === 'am' ? 'գրանցման ամսաթիվը' : ($locale === 'ru' ? 'дата регистрации' : 'registration date (year-month-day)'), 'value' => $document->registration_date?->format('Y-m-d')],
+                    ['label' => $locale === 'am' ? 'գրանցման համարը' : ($locale === 'ru' ? 'номер регистрации' : 'registration number'), 'value' => $document->registration_number],
+                    ['label' => $locale === 'am' ? 'գրանցման մարմինը' : ($locale === 'ru' ? 'орган регистрации' : 'registration authority'), 'value' => $document->registration_authority],
+                ], fn ($f) => filled($f['value'] ?? null))),
+            ],
+        ], fn ($section) => !empty($section['fields'])));
     } else {
         $documentTitle = $structured['title'] ?? $document->title ?? $document->document_type ?? $copy['generic_title'];
     }
@@ -117,15 +118,27 @@
     .source-result-section__title{margin:0 0 12px;color:#333;font-size:15px;line-height:1.35;font-weight:400}
     .source-result-row{display:grid;grid-template-columns:1fr 1fr;gap:0;padding:9px 0;font-size:13px;line-height:1.45}.source-result-row>div{padding-right:25px;color:#adadad}.source-result-row>strong{color:#333;font-weight:400;overflow-wrap:anywhere}
     .source-result-row--full{grid-template-columns:1fr}.source-result-row--full>strong{font-size:14px;line-height:1.5}
+    .source-result-row--empty>strong{min-height:1em}
     .source-result-empty{padding:18px 0;color:#adadad;font-size:13px;text-align:center}
 
     @media(max-width:760px){
-        .source-result-shell{width:calc(100vw - 24px);margin-top:58px;padding-top:136px}
+        .source-result-shell{width:calc(100vw - 24px);margin-top:58px;padding-top:136px;border-radius:0}
         .source-result-topbar{top:-22px;width:calc(100% - 24px);height:auto;min-height:58px;padding:13px 16px;align-items:flex-start}
         .source-result-code{font-size:15px;letter-spacing:1.5px}.source-result-reset{font-size:11px}
         .source-result-title{top:52px;left:18px;right:18px;font-size:22px}
-        .source-result-success{width:calc(100% - 24px);height:184px}.source-result-status{top:55px;font-size:19px}.source-result-download{top:116px}
-        .source-result-details{width:calc(100% - 48px);padding-top:23px;padding-bottom:34px}.source-result-row{grid-template-columns:45% 55%;padding:7px 0;font-size:12px}.source-result-section__title{font-size:14px}
+        .source-result-success{width:calc(100% - 14px);height:184px;border-radius:0 0 13px 13px}.source-result-status{top:55px;font-size:19px}.source-result-download{top:116px}
+
+        /* Original mobile source layout: every label/value is its own card. */
+        .source-result-details{width:calc(100% - 14px);padding:7px 0 24px}
+        .source-result-section{margin:0;padding:0 0 8px;border-bottom:0}
+        .source-result-section+.source-result-section{padding-top:1px}
+        .source-result-section__title{margin:0 0 8px;color:#222;font-size:11px;line-height:1.35;font-weight:400}
+        .source-result-row,
+        .source-result-row--full{display:block;min-height:52px;margin:0 0 8px;padding:10px 12px 9px;background:#f4f4f4;border-radius:13px;box-sizing:border-box;font-size:11px;line-height:1.3}
+        .source-result-row>div{display:block;margin:0 0 5px;padding:0;color:#9ca3aa;font-size:9px;line-height:1.2}
+        .source-result-row>strong,
+        .source-result-row--full>strong{display:block;min-height:14px;color:#111;font-size:10.5px;line-height:1.35;font-weight:500;overflow-wrap:anywhere}
+        .source-result-row--empty>strong{min-height:14px}
     }
 </style>
 
@@ -162,10 +175,14 @@
                         <h3 class="source-result-section__title">{{ $section['title'] }}</h3>
                     @endif
                     @foreach($fields as $field)
-                        @if(filled($field['value'] ?? null))
-                            <div class="source-result-row {{ blank($field['label'] ?? null) ? 'source-result-row--full' : '' }}">
+                        @php
+                            $fieldValue = $field['value'] ?? null;
+                            $showEmpty = !empty($field['show_empty']);
+                        @endphp
+                        @if(filled($fieldValue) || $showEmpty)
+                            <div class="source-result-row {{ blank($field['label'] ?? null) ? 'source-result-row--full' : '' }} {{ blank($fieldValue) ? 'source-result-row--empty' : '' }}">
                                 @if(filled($field['label'] ?? null))<div>{{ $field['label'] }}</div>@endif
-                                <strong>{{ $field['value'] }}</strong>
+                                <strong>{{ $fieldValue }}</strong>
                             </div>
                         @endif
                     @endforeach
