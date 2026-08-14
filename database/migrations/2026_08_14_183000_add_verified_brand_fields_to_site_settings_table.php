@@ -21,15 +21,25 @@ return new class extends Migration
             'verified_subtitle_am',
         ];
 
+        // A previous interrupted migration may already have created some of
+        // these columns as VARCHAR. Convert those first to TEXT so they stop
+        // consuming the scarce inline row space in site_settings.
+        foreach ($columns as $name) {
+            if (! Schema::hasColumn('site_settings', $name)) {
+                continue;
+            }
+
+            Schema::table('site_settings', function (Blueprint $table) use ($name): void {
+                $table->text($name)->nullable()->change();
+            });
+        }
+
         foreach ($columns as $name) {
             if (Schema::hasColumn('site_settings', $name)) {
                 continue;
             }
 
             Schema::table('site_settings', function (Blueprint $table) use ($name): void {
-                // site_settings already contains many VARCHAR columns and is close
-                // to InnoDB's maximum inline row size. TEXT keeps these settings
-                // off-row and avoids SQLSTATE 1118 (Row size too large).
                 $table->text($name)->nullable();
             });
         }
