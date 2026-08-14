@@ -95,6 +95,21 @@
         ],
     ];
 
+    $verifiedBrand = [
+        'en' => [
+            'country' => 'Republic of Armenia',
+            'subtitle' => 'unified system for checking the validity of official documents',
+        ],
+        'ru' => [
+            'country' => 'Республика Армения',
+            'subtitle' => 'единая система проверки действительности официальных документов',
+        ],
+        'am' => [
+            'country' => 'Հայաստանի Հանրապետություն',
+            'subtitle' => 'պաշտոնական փաստաթղթերի վավերականության ստուգման միասնական համակարգ',
+        ],
+    ][$locale] ?? null;
+
     $d = $defaults[$locale] ?? $defaults['en'];
     $v = $verificationCopy[$locale] ?? $verificationCopy['en'];
     $tnum = request('tnum', $tnum ?? '');
@@ -144,15 +159,23 @@
 </header>
 
 <main>
-    <div class="page-heading color-grey hide-sm show-md">
-        <div class="row align-center"><div class="column small-14 large-10 x-large-8"><div class="text-center">
-            <div class="custom-headline h5 text-height-150 font-bold font-spacing-rv-04"><h1>{{ $field('site_name', $d['site_name']) }}</h1></div>
-            <div class="helvetica-65 text-height-150">
-                <div class="helvetica-65 font-medium">{{ $field('hero_title', $d['hero_title']) }}</div>
-                <div>{{ $field('hero_subtitle', $d['hero_subtitle']) }}</div>
-            </div>
-        </div></div></div>
-    </div>
+    @if($verificationResult === 'valid' && $document)
+        <div class="verified-source-brand color-grey hide-sm show-md text-center" style="margin-top:36px;">
+            <div style="font-family:'Montserratarm',Arial,sans-serif;font-size:38px;line-height:1.12;font-weight:700;letter-spacing:-1.4px;">arm.gov.e-verify.net</div>
+            <div class="helvetica-55" style="margin-top:8px;font-size:14px;line-height:1.35;">{{ $verifiedBrand['country'] }}</div>
+            <div class="helvetica-55" style="margin-top:2px;font-size:13px;line-height:1.35;">{{ $verifiedBrand['subtitle'] }}</div>
+        </div>
+    @else
+        <div class="page-heading color-grey hide-sm show-md">
+            <div class="row align-center"><div class="column small-14 large-10 x-large-8"><div class="text-center">
+                <div class="custom-headline h5 text-height-150 font-bold font-spacing-rv-04"><h1>{{ $field('site_name', $d['site_name']) }}</h1></div>
+                <div class="helvetica-65 text-height-150">
+                    <div class="helvetica-65 font-medium">{{ $field('hero_title', $d['hero_title']) }}</div>
+                    <div>{{ $field('hero_subtitle', $d['hero_subtitle']) }}</div>
+                </div>
+            </div></div></div>
+        </div>
+    @endif
 
     <div class="row align-center">
         <div class="column small-14 large-12" id="main_cont">
