@@ -10,24 +10,27 @@ return new class extends Migration
     public function up(): void
     {
         $columns = [
-            'verified_service_name_ru' => 255,
-            'verified_country_ru' => 255,
-            'verified_subtitle_ru' => 500,
-            'verified_service_name_en' => 255,
-            'verified_country_en' => 255,
-            'verified_subtitle_en' => 500,
-            'verified_service_name_am' => 255,
-            'verified_country_am' => 255,
-            'verified_subtitle_am' => 500,
+            'verified_service_name_ru',
+            'verified_country_ru',
+            'verified_subtitle_ru',
+            'verified_service_name_en',
+            'verified_country_en',
+            'verified_subtitle_en',
+            'verified_service_name_am',
+            'verified_country_am',
+            'verified_subtitle_am',
         ];
 
-        foreach ($columns as $name => $length) {
+        foreach ($columns as $name) {
             if (Schema::hasColumn('site_settings', $name)) {
                 continue;
             }
 
-            Schema::table('site_settings', function (Blueprint $table) use ($name, $length): void {
-                $table->string($name, $length)->nullable();
+            Schema::table('site_settings', function (Blueprint $table) use ($name): void {
+                // site_settings already contains many VARCHAR columns and is close
+                // to InnoDB's maximum inline row size. TEXT keeps these settings
+                // off-row and avoids SQLSTATE 1118 (Row size too large).
+                $table->text($name)->nullable();
             });
         }
 
