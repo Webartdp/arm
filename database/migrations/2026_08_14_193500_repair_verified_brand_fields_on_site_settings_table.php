@@ -10,24 +10,27 @@ return new class extends Migration
     public function up(): void
     {
         $columns = [
-            'verified_service_name_ru' => ['type' => 'string', 'length' => 255],
-            'verified_country_ru' => ['type' => 'string', 'length' => 255],
-            'verified_subtitle_ru' => ['type' => 'string', 'length' => 500],
-            'verified_service_name_en' => ['type' => 'string', 'length' => 255],
-            'verified_country_en' => ['type' => 'string', 'length' => 255],
-            'verified_subtitle_en' => ['type' => 'string', 'length' => 500],
-            'verified_service_name_am' => ['type' => 'string', 'length' => 255],
-            'verified_country_am' => ['type' => 'string', 'length' => 255],
-            'verified_subtitle_am' => ['type' => 'string', 'length' => 500],
+            'verified_service_name_ru',
+            'verified_country_ru',
+            'verified_subtitle_ru',
+            'verified_service_name_en',
+            'verified_country_en',
+            'verified_subtitle_en',
+            'verified_service_name_am',
+            'verified_country_am',
+            'verified_subtitle_am',
         ];
 
-        foreach ($columns as $name => $definition) {
+        foreach ($columns as $name) {
             if (Schema::hasColumn('site_settings', $name)) {
                 continue;
             }
 
-            Schema::table('site_settings', function (Blueprint $table) use ($name, $definition): void {
-                $table->string($name, $definition['length'])->nullable();
+            Schema::table('site_settings', function (Blueprint $table) use ($name): void {
+                // Use TEXT because site_settings is already near InnoDB's
+                // maximum inline row size and extra VARCHAR columns can fail
+                // with SQLSTATE 1118 (Row size too large).
+                $table->text($name)->nullable();
             });
         }
 
