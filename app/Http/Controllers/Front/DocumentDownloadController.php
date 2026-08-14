@@ -23,16 +23,21 @@ class DocumentDownloadController extends Controller
             ->firstOrFail();
 
         abort_unless($document->effective_status === 'active', 404);
-        abort_unless(filled($document->download_archive_path), 404);
 
         $disk = Storage::disk('local');
-        abort_unless($disk->exists($document->download_archive_path), 404);
+        $path = filled($document->download_archive_path)
+            ? $document->download_archive_path
+            : $document->file_path;
+
+        abort_unless(filled($path) && $disk->exists($path), 404);
+
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        $filename = $document->tracking_number . ($extension !== '' ? '.' . $extension : '');
 
         return $disk->download(
-            $document->download_archive_path,
-            $document->tracking_number . '.zip',
+            $path,
+            $filename,
             [
-                'Content-Type' => 'application/zip',
                 'X-Content-Type-Options' => 'nosniff',
                 'Cache-Control' => 'private, no-store, max-age=0',
             ]
