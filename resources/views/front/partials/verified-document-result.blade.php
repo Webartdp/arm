@@ -33,9 +33,6 @@
     if ($document->document_kind === 'birth_certificate') {
         $documentTitle = $birthTitles[$locale] ?? $birthTitles['en'];
 
-        // Birth certificates have a known source layout. Build these sections
-        // from normalized fields so the renderer can reproduce the original
-        // document structure consistently on desktop and mobile.
         $sections = array_values(array_filter([
             [
                 'title' => $locale === 'am' ? 'Քաղաքացի' : ($locale === 'ru' ? 'Гражданин' : 'Citizen'),
@@ -85,7 +82,7 @@
         $documentTitle = $structured['title'] ?? $document->title ?? $document->document_type ?? $copy['generic_title'];
     }
 
-    $displayCode = str_replace('-', ' - ', $document->tracking_number);
+    $displayCode = str_replace('-', ' ', $document->tracking_number);
     $canDownload = filled($document->download_archive_path) || filled($document->file_path);
 @endphp
 
@@ -122,23 +119,75 @@
     .source-result-empty{padding:18px 0;color:#adadad;font-size:13px;text-align:center}
 
     @media(max-width:760px){
-        .source-result-shell{width:calc(100vw - 24px);margin-top:58px;padding-top:136px;border-radius:0}
-        .source-result-topbar{top:-22px;width:calc(100% - 24px);height:auto;min-height:58px;padding:13px 16px;align-items:flex-start}
-        .source-result-code{font-size:15px;letter-spacing:1.5px}.source-result-reset{font-size:11px}
-        .source-result-title{top:52px;left:18px;right:18px;font-size:22px}
-        .source-result-success{width:calc(100% - 14px);height:184px;border-radius:0 0 13px 13px}.source-result-status{top:55px;font-size:19px}.source-result-download{top:116px}
+        body:has(.verified-source-result-marker){background:#283e42!important}
 
-        /* Original mobile source layout: every label/value is its own card. */
-        .source-result-details{width:calc(100% - 14px);padding:7px 0 24px}
-        .source-result-section{margin:0;padding:0 0 8px;border-bottom:0}
-        .source-result-section+.source-result-section{padding-top:1px}
-        .source-result-section__title{margin:0 0 8px;color:#222;font-size:11px;line-height:1.35;font-weight:400}
+        .source-result-shell{
+            width:calc(100vw - 36px);
+            margin:0 auto;
+            padding-top:153px;
+            border-radius:0;
+            box-shadow:none;
+        }
+
+        .source-result-topbar{
+            top:0;
+            width:calc(100% - 12px);
+            height:44px;
+            min-height:44px;
+            padding:0 18px;
+            align-items:center;
+            border-radius:0 0 8px 8px;
+        }
+        .source-result-code{font-size:13px;letter-spacing:.8px}
+        .source-result-reset{gap:0;font-size:0}
+        .source-result-reset>span:first-child{display:none}
+        .source-result-reset__x{width:18px;height:18px;flex-basis:18px}
+        .source-result-reset__x:before,.source-result-reset__x:after{top:8px;left:2px;width:15px;height:1px}
+
+        .source-result-title{
+            top:65px;
+            left:16px;
+            right:16px;
+            font-size:28px;
+            line-height:1.05;
+            font-weight:400;
+        }
+
+        .source-result-success{
+            width:calc(100% - 12px);
+            height:111px;
+            border-radius:12px;
+        }
+        .source-result-success:before{top:-12px;width:48px;height:48px}
+        .source-result-check{top:5px;width:18px;height:18px;border-width:2px}
+        .source-result-check:after{left:4px;top:4px;width:6px;height:4px;border-left-width:2px;border-bottom-width:2px}
+        .source-result-status{top:36px;font-size:13px;line-height:1.2}
+        .source-result-download{top:64px;min-height:30px;padding:0 10px 0 12px;gap:7px;border-radius:16px;font-size:8px}
+        .source-result-download__arrow{width:13px;height:14px}
+        .source-result-download__arrow:before{top:0;left:6px;width:1px;height:9px}
+        .source-result-download__arrow:after{left:3px;bottom:1px;width:7px;height:7px;border-right-width:1px;border-bottom-width:1px}
+
+        .source-result-details{width:calc(100% - 12px);padding:7px 0 24px}
+        .source-result-section{margin:0;padding:0 0 12px;border-bottom:0}
+        .source-result-section+.source-result-section{padding-top:0}
+        .source-result-section__title{margin:0 0 10px;color:#222;font-size:9px;line-height:1.3;font-weight:400}
         .source-result-row,
-        .source-result-row--full{display:block;min-height:52px;margin:0 0 8px;padding:10px 12px 9px;background:#f4f4f4;border-radius:13px;box-sizing:border-box;font-size:11px;line-height:1.3}
+        .source-result-row--full{
+            display:block;
+            min-height:52px;
+            margin:0 0 8px;
+            padding:11px 12px 9px;
+            background:#f5f5f5;
+            border-radius:13px;
+            box-sizing:border-box;
+            font-size:11px;
+            line-height:1.3;
+        }
         .source-result-row>div{display:block;margin:0 0 5px;padding:0;color:#9ca3aa;font-size:9px;line-height:1.2}
         .source-result-row>strong,
         .source-result-row--full>strong{display:block;min-height:14px;color:#111;font-size:10.5px;line-height:1.35;font-weight:500;overflow-wrap:anywhere}
-        .source-result-row--empty>strong{min-height:14px}
+        .source-result-row--empty{min-height:41px;padding-bottom:8px}
+        .source-result-row--empty>strong{display:none;min-height:0}
     }
 </style>
 
