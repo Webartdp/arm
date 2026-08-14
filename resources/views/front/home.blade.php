@@ -95,20 +95,30 @@
         ],
     ];
 
-    $verifiedBrand = [
+    $verifiedBrandDefaults = [
         'en' => [
+            'service_name' => 'arm.gov.e-verify.net',
             'country' => 'Republic of Armenia',
             'subtitle' => 'unified system for checking the validity of official documents',
         ],
         'ru' => [
+            'service_name' => 'arm.gov.e-verify.net',
             'country' => 'Республика Армения',
             'subtitle' => 'единая система проверки действительности официальных документов',
         ],
         'am' => [
+            'service_name' => 'arm.gov.e-verify.net',
             'country' => 'Հայաստանի Հանրապետություն',
             'subtitle' => 'պաշտոնական փաստաթղթերի վավերականության ստուգման միասնական համակարգ',
         ],
-    ][$locale] ?? null;
+    ];
+
+    $verifiedBrandDefault = $verifiedBrandDefaults[$locale] ?? $verifiedBrandDefaults['en'];
+    $verifiedBrand = [
+        'service_name' => $field('verified_service_name', $verifiedBrandDefault['service_name']),
+        'country' => $field('verified_country', $verifiedBrandDefault['country']),
+        'subtitle' => $field('verified_subtitle', $verifiedBrandDefault['subtitle']),
+    ];
 
     $d = $defaults[$locale] ?? $defaults['en'];
     $v = $verificationCopy[$locale] ?? $verificationCopy['en'];
@@ -161,7 +171,7 @@
 <main>
     @if($verificationResult === 'valid' && $document)
         <div class="verified-source-brand color-grey hide-sm show-md text-center" style="margin-top:36px;">
-            <h1 style="font-size:38px;line-height:1.12;font-weight:800;letter-spacing:-1.4px;">arm.gov.e-verify.net</h1>
+            <h1 style="font-size:38px;line-height:1.12;font-weight:800;letter-spacing:-1.4px;">{{ $verifiedBrand['service_name'] }}</h1>
             <div class="helvetica-55" style="margin-top:8px;font-size:14px;line-height:1.35;">{{ $verifiedBrand['country'] }}</div>
             <div class="helvetica-55" style="margin-top:2px;font-size:13px;line-height:1.35;">{{ $verifiedBrand['subtitle'] }}</div>
         </div>
