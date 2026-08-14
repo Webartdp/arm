@@ -135,7 +135,7 @@
     .source-result-reset__x:before,.source-result-reset__x:after{content:'';position:absolute;top:10px;left:1px;width:20px;height:2px;background:#adadad;border-radius:2px}
     .source-result-reset__x:before{transform:rotate(45deg)}
     .source-result-reset__x:after{transform:rotate(-45deg)}
-    .source-result-title{position:absolute;top:61px;left:32px;right:32px;margin:0;color:#333;font-family:'GHEA Narek',Georgia,'Times New Roman',serif;font-size:35px;line-height:1.18;font-weight:400;text-align:center;text-transform:uppercase}
+    .source-result-title{position:absolute;top:61px;left:32px;right:32px;margin:0;color:#333;font-family:'GHEA Narek','Times New Roman',Times,serif;font-size:35px;line-height:1.18;font-weight:400;text-align:center;text-transform:uppercase}
     .source-result-success{position:relative;width:min(912px,calc(100% - 64px));height:198px;margin:0 auto;background:#18bbb4;border-radius:12px;color:#fff}
     .source-result-success:before{content:'';position:absolute;top:-39px;left:50%;transform:translateX(-50%);width:80px;height:80px;background:#18bbb4;border-radius:50%}
     .source-result-check{position:absolute;top:-21px;left:50%;z-index:2;transform:translateX(-50%);display:flex;align-items:center;justify-content:center;width:30px;height:30px;color:#fff}
@@ -156,6 +156,14 @@
     .source-result-row--full>strong{font-size:14px;line-height:1.5}
     .source-result-row--empty>strong{min-height:1em}
     .source-result-empty{padding:18px 0;color:#adadad;font-size:13px;text-align:center}
+
+    html[lang="ru"] .source-result-title,
+    html[lang="ru"] .source-result-reset,
+    html[lang="ru"] .source-result-status,
+    html[lang="ru"] .source-result-download,
+    html[lang="ru"] .source-result-details{
+        font-family:'Times New Roman',Times,serif!important;
+    }
 
     @media(max-width:760px){
         .source-result-shell{
