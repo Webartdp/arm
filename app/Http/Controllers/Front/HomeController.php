@@ -54,7 +54,17 @@ class HomeController extends Controller
         $document = null;
         $verificationResult = null;
 
-        if ($request->has('tnum') && trim((string) $request->query('tnum')) !== '') {
+        // QR links contain only `tnum`, so opening a QR just pre-fills the form.
+        // The existing form always submits the hidden `date` field (even when
+        // it is empty), therefore presence of `date` is our explicit submit
+        // marker and verification only starts after the user presses Verify.
+        $verificationRequested = $request->has('date');
+
+        if (
+            $verificationRequested
+            && $request->has('tnum')
+            && trim((string) $request->query('tnum')) !== ''
+        ) {
             if (strlen($rawTrackingNumber) !== 16) {
                 $verificationResult = 'invalid';
             } else {
