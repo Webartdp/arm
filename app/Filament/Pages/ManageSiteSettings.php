@@ -196,6 +196,28 @@ class ManageSiteSettings extends Page
                             ->columnSpanFull(),
                     ]),
 
+                Section::make('Страница проверки')
+                    ->description('Блок над результатом успешной проверки документа.')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make("verified_service_name_{$locale}")
+                            ->label('Название сервиса')
+                            ->required()
+                            ->maxLength(255),
+
+                        TextInput::make("verified_country_{$locale}")
+                            ->label('Страна')
+                            ->required()
+                            ->maxLength(255),
+
+                        Textarea::make("verified_subtitle_{$locale}")
+                            ->label('Описание')
+                            ->required()
+                            ->rows(2)
+                            ->maxLength(500)
+                            ->columnSpanFull(),
+                    ]),
+
                 Section::make('Страница «О системе»')
                     ->schema([
                         TextInput::make("about_title_{$locale}")

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Jobs\ProcessDocumentUpload;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -19,6 +20,7 @@ class Document extends Model
             'valid_until' => 'date',
             'birth_date' => 'date',
             'registration_date' => 'date',
+            'processed_at' => 'datetime',
             'metadata' => 'array',
         ];
     }
@@ -43,6 +45,17 @@ class Document extends Model
 
             if ($document->exists && auth()->check()) {
                 $document->updated_by = auth()->id();
+            }
+        });
+
+        static::saved(function (Document $document): void {
+            if ($document->wasChanged('file_path') && filled($document->file_path)) {
+                $document->forceFill([
+                    'processing_status' => 'queued',
+                    'processing_error' => null,
+                ])->saveQuietly();
+
+                ProcessDocumentUpload::dispatch($document->getKey())->afterCommit();
             }
         });
     }
