@@ -40,16 +40,21 @@ class ProcessDocumentUpload implements ShouldQueue
         try {
             $text = $extractor->extract($document);
             $data = $parser->parse($text);
+            $structured = $data['_structured'] ?? null;
+            unset($data['_structured']);
 
             $metadata = is_array($document->metadata) ? $document->metadata : [];
             $metadata['recognition'] = [
                 'processed_at' => now()->toIso8601String(),
-                'parser' => 'local-ocr-v1',
+                'parser' => 'local-structured-v2',
                 'characters' => mb_strlen($text),
             ];
 
-            // Save OCR result first. Archive generation must never make a
-            // successfully recognized document look like an OCR failure.
+            if (is_array($structured)) {
+                $metadata['structured'] = $structured;
+            }
+
+            // Save OCR and structured data before doing any optional archive work.
             $document->forceFill(array_merge($data, [
                 'processing_status' => 'processed',
                 'processing_error' => null,
@@ -64,8 +69,6 @@ class ProcessDocumentUpload implements ShouldQueue
                     'download_archive_path' => $archivePath,
                 ])->saveQuietly();
             } catch (Throwable $archiveException) {
-                // The public download controller already falls back to the
-                // original file, so an archive problem is non-fatal.
                 $metadata = is_array($document->metadata) ? $document->metadata : [];
                 $metadata['archive_error'] = mb_substr($archiveException->getMessage(), 0, 2000);
 
