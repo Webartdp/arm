@@ -36,23 +36,33 @@ final class DocumentDataParser
             '/^Граждан/ui',
             '/^Քաղաքացի\b/ui',
         ]) ?? 0;
+
         $fatherStart = $this->findSection($lines, [
             '/^father\b/ui',
             '/^отец\b/ui',
             '/^Հայրը\b/ui',
         ]);
+
         $motherStart = $this->findSection($lines, [
             '/^mother\b/ui',
             '/^мать\b/ui',
             '/^Մայրը\b/ui',
         ]);
+
         $registrationStart = $this->findSection($lines, [
             '/registration date/ui',
             '/дата регистрации/ui',
-            '/գրանցման ամսաթիվ/ui',
+            '/գրանցման\s+(?:ամսաթիվ|ժամանակ)/ui',
             '/еди(?:ном|ный).*реестр/ui',
             '/միասնական էլեկտրոնային գրանցամատյան/ui',
         ]);
+
+        $issueStart = $this->findSection($lines, [
+            '/^Վկայականը\s+տրվել\s+է/ui',
+            '/^Certificate\s+(?:was\s+)?issued/ui',
+            '/^Свидетельство\s+выдан/ui',
+        ]);
+
         $certificatesStart = $this->findSection($lines, [
             '/^Certificates?\b/ui',
             '/^Свидетельства?\b/ui',
@@ -60,25 +70,29 @@ final class DocumentDataParser
         ]);
 
         $citizenEnd = $fatherStart ?? $motherStart ?? $registrationStart ?? count($lines);
-        $fatherEnd = $motherStart ?? $registrationStart ?? $certificatesStart ?? count($lines);
-        $motherEnd = $registrationStart ?? $certificatesStart ?? count($lines);
-        $registrationEnd = $certificatesStart ?? count($lines);
+        $fatherEnd = $motherStart ?? $registrationStart ?? $certificatesStart ?? $issueStart ?? count($lines);
+        $motherEnd = $registrationStart ?? $certificatesStart ?? $issueStart ?? count($lines);
+        $registrationEnd = $issueStart ?? $certificatesStart ?? count($lines);
+        $issueEnd = count($lines);
 
         $firstNamePatterns = [
             '/first\s+name/ui',
             '/\bимя\b/ui',
             '/անունը/ui',
         ];
+
         $patronymicPatterns = [
             '/patronymic/ui',
             '/отчеств/ui',
             '/հայրանունը/ui',
         ];
+
         $lastNamePatterns = [
             '/last\s+name/ui',
             '/фамили/ui',
             '/ազգանունը/ui',
         ];
+
         $nationalityPatterns = [
             '/nationality/ui',
             '/национальност/ui',
@@ -88,7 +102,7 @@ final class DocumentDataParser
         $registrationDate = $this->dateValue($this->valueFor($lines, [
             '/registration date(?:\s*\([^)]*\))?/ui',
             '/дата регистрации(?:\s*\([^)]*\))?/ui',
-            '/գրանցման ամսաթիվը?(?:\s*\([^)]*\))?/ui',
+            '/գրանցման\s+(?:ամսաթիվը?|ժամանակը?)(?:\s*\([^)]*\))?/ui',
         ], $registrationStart ?? 0, $registrationEnd));
 
         $data = [
@@ -110,8 +124,9 @@ final class DocumentDataParser
             'birth_date' => $this->dateValue($this->valueFor($lines, [
                 '/birth date(?:\s*\([^)]*\))?/ui',
                 '/дата рождения(?:\s*\([^)]*\))?/ui',
-                '/ծննդյան ամսաթիվը?(?:\s*\([^)]*\))?/ui',
+                '/ծննդյան\s+(?:ամսաթիվը?|ժամանակը?)(?:\s*\([^)]*\))?/ui',
             ], 0, $fatherStart ?? count($lines))),
+
             'birth_place' => $this->valueFor($lines, [
                 '/place of birth(?:\s*\([^)]*\))?/ui',
                 '/место рождения(?:\s*\([^)]*\))?/ui',
@@ -134,11 +149,13 @@ final class DocumentDataParser
                 '/номер регистрации/ui',
                 '/գրանցման համարը?/ui',
             ], $registrationStart ?? 0, $registrationEnd),
+
             'registration_authority' => $this->valueFor($lines, [
                 '/registration authority/ui',
                 '/орган регистрации/ui',
-                '/գրանցման մարմինը?/ui',
+                '/գրանցման\s+(?:մարմինը?|վայրը?)/ui',
             ], $registrationStart ?? 0, $registrationEnd),
+
             'certificate_number' => $this->valueFor($lines, [
                 '/Certificate\s*1/ui',
                 '/Свидетельство\s*1/ui',
@@ -149,11 +166,24 @@ final class DocumentDataParser
             ], $certificatesStart ?? 0, count($lines)),
         ];
 
-        $issueDate = $this->dateValue($this->valueFor($lines, [
-            '/issue date/ui',
-            '/дата выдачи/ui',
-            '/տրման ամսաթիվ/ui',
-        ], 0, count($lines)));
+        $issueDate = null;
+
+        if ($issueStart !== null) {
+            $issueDate = $this->dateValue($this->valueFor($lines, [
+                '/^ժամանակը/ui',
+                '/տրման\s+(?:ամսաթիվը?|ժամանակը?)/ui',
+                '/issue date/ui',
+                '/дата выдачи/ui',
+            ], $issueStart, $issueEnd));
+        }
+
+        if (! $issueDate) {
+            $issueDate = $this->dateValue($this->valueFor($lines, [
+                '/issue date/ui',
+                '/дата выдачи/ui',
+                '/տրման ամսաթիվ/ui',
+            ], 0, count($lines)));
+        }
 
         $data['issue_date'] = $issueDate ?: $registrationDate;
 
@@ -162,6 +192,7 @@ final class DocumentDataParser
             $data['citizen_patronymic'],
             $data['citizen_last_name'],
         ]);
+
         $data['subject_name'] = $subjectParts !== [] ? implode(' ', $subjectParts) : null;
 
         return array_filter($data, static fn ($value): bool => $value !== null && $value !== '');
@@ -223,15 +254,15 @@ final class DocumentDataParser
 
                 $label = $match[0][0] ?? '';
                 $position = $match[0][1] ?? 0;
-                $remainder = trim(substr($lines[$i], $position + strlen($label)));
-                $remainder = trim($remainder, " \t:-–—|.;");
+                $remainder = substr($lines[$i], $position + strlen($label));
+                $remainder = $this->cleanValue((string) $remainder);
 
                 if ($this->looksLikeValue($remainder)) {
                     return $remainder;
                 }
 
                 for ($j = $i + 1; $j < min($end, $i + 4); $j++) {
-                    $candidate = trim($lines[$j]);
+                    $candidate = $this->cleanValue($lines[$j]);
 
                     if ($this->looksLikeValue($candidate) && ! $this->looksLikeLabel($candidate)) {
                         return $candidate;
@@ -243,6 +274,14 @@ final class DocumentDataParser
         return null;
     }
 
+    private function cleanValue(string $value): string
+    {
+        $value = trim($value);
+        $value = preg_replace('/^[\s:;,.|–—՝։]+|[\s:;,.|–—՝։]+$/u', '', $value) ?? $value;
+
+        return trim($value);
+    }
+
     private function looksLikeValue(string $value): bool
     {
         return $value !== '' && mb_strlen($value) <= 500;
@@ -251,7 +290,7 @@ final class DocumentDataParser
     private function looksLikeLabel(string $line): bool
     {
         return (bool) preg_match(
-            '/(?:first name|last name|patronymic|nationality|citizenship|birth date|place of birth|registration date|registration number|registration authority|имя|фамили|отчеств|национальност|гражданств|дата рождения|место рождения|дата регистрации|номер регистрации|орган регистрации|անունը|հայրանունը|ազգանունը|ազգությունը|քաղաքացիությունը|ծննդյան ամսաթիվ|ծննդյան վայր|գրանցման ամսաթիվ|գրանցման համար|գրանցման մարմին)/ui',
+            '/(?:first name|last name|patronymic|nationality|citizenship|birth date|place of birth|registration date|registration number|registration authority|имя|фамили|отчеств|национальност|гражданств|дата рождения|место рождения|дата регистрации|номер регистрации|орган регистрации|անունը|հայրանունը|ազգանունը|ազգությունը|քաղաքացիությունը|ծննդյան\s+(?:ամսաթիվ|ժամանակ|վայր)|գրանցման\s+(?:ամսաթիվ|ժամանակ|համար|մարմին|վայր)|Վկայականը\s+տրվել\s+է)/ui',
             $line
         );
     }
@@ -268,6 +307,38 @@ final class DocumentDataParser
 
         if (preg_match('/\b(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})\b/u', $value, $match)) {
             return sprintf('%04d-%02d-%02d', (int) $match[3], (int) $match[2], (int) $match[1]);
+        }
+
+        $armenianMonths = [
+            'ՀՈՒՆՎԱՐԻ' => 1,
+            'ՓԵՏՐՎԱՐԻ' => 2,
+            'ՄԱՐՏԻ' => 3,
+            'ԱՊՐԻԼԻ' => 4,
+            'ՄԱՅԻՍԻ' => 5,
+            'ՀՈՒՆԻՍԻ' => 6,
+            'ՀՈՒԼԻՍԻ' => 7,
+            'ՕԳՈՍՏՈՍԻ' => 8,
+            'ՍԵՊՏԵՄԲԵՐԻ' => 9,
+            'ՀՈԿՏԵՄԲԵՐԻ' => 10,
+            'ՆՈՅԵՄԲԵՐԻ' => 11,
+            'ԴԵԿՏԵՄԲԵՐԻ' => 12,
+        ];
+
+        $monthPattern = implode('|', array_map(
+            static fn (string $month): string => preg_quote($month, '/'),
+            array_keys($armenianMonths)
+        ));
+
+        if (preg_match(
+            '/(\d{4})\s*ԹՎԱԿԱՆԻ\s*(' . $monthPattern . ')\s*(\d{1,2})\s*(?:-\s*ԻՆ)?/ui',
+            mb_strtoupper($value),
+            $match
+        )) {
+            $month = $armenianMonths[$match[2]] ?? null;
+
+            if ($month !== null) {
+                return sprintf('%04d-%02d-%02d', (int) $match[1], $month, (int) $match[3]);
+            }
         }
 
         try {
