@@ -3,7 +3,7 @@
     $statusLabel = match ($status) {
         'queued' => 'В очереди на распознавание',
         'processing' => 'Распознаётся…',
-        'processed' => 'Распознано',
+        'processed' => 'Готово',
         'failed' => 'Ошибка распознавания',
         default => 'Файл ещё не обрабатывался',
     };
@@ -27,8 +27,8 @@
                 <div style="color:#6b7280;">Код проверки</div>
                 <div style="font-weight:600;letter-spacing:.08em;">{{ $record->tracking_number }}</div>
 
-                <div style="color:#6b7280;">Тип</div>
-                <div>{{ $record->document_kind === 'birth_certificate' ? 'Свидетельство о рождении' : ($record->document_type ?: 'Определяется автоматически') }}</div>
+                <div style="color:#6b7280;">Тип документа</div>
+                <div>{{ $record->document_type ?: ($record->document_kind === 'birth_certificate' ? 'Свидетельство о рождении' : 'Определяется автоматически') }}</div>
 
                 @if($record->processed_at)
                     <div style="color:#6b7280;">Обработан</div>
@@ -47,11 +47,11 @@
                 </div>
             @elseif($status === 'processed')
                 <div style="margin-top:16px;padding:12px 14px;border-radius:8px;background:#ecfdf5;color:#065f46;font-size:13px;line-height:1.5;">
-                    Данные заполнены автоматически. Ручная правка ниже нужна только если OCR распознал что-то неверно.
+                    Документ распознан. Все извлечённые данные сохранены автоматически и используются на публичной странице проверки.
                 </div>
             @else
                 <div style="margin-top:16px;padding:12px 14px;border-radius:8px;background:#eff6ff;color:#1e40af;font-size:13px;line-height:1.5;">
-                    После загрузки нового файла распознавание запускается автоматически. Обновите страницу через несколько секунд, чтобы увидеть заполненные поля.
+                    После загрузки файла распознавание запускается автоматически. Никакие дополнительные поля заполнять не нужно.
                 </div>
             @endif
         </div>
@@ -78,6 +78,6 @@
     </style>
 @else
     <div style="font-size:14px;color:#6b7280;line-height:1.6;">
-        Сначала загрузите документ и сохраните запись. Код проверки, распознавание и QR будут созданы автоматически.
+        Загрузите документ и нажмите «Создать». Код проверки, распознавание и QR-код будут созданы автоматически.
     </div>
 @endif
